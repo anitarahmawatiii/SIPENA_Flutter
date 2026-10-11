@@ -3,13 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:sipena/activity_pages.dart';
 import 'package:sipena/activity_detail_page.dart';
+import 'package:sipena/login_page.dart';
 import 'package:sipena/main.dart';
 
 class _ActivityFormLauncher extends StatefulWidget {
-  const _ActivityFormLauncher({
-    required this.initial,
-    this.pickDocument,
-  });
+  const _ActivityFormLauncher({required this.initial, this.pickDocument});
 
   final ActivityEntry initial;
   final Future<ActivityDocument?> Function()? pickDocument;
@@ -70,7 +68,371 @@ Future<void> _fillField(
   await tester.enterText(field, value);
 }
 
+Future<void> _signInAs(WidgetTester tester, String role) async {
+  await tester.pumpWidget(const SipenaApp());
+  if (role != 'Mahasiswa') {
+    await tester.tap(find.text(role));
+  }
+  await _fillField(tester, 'login-email', '${role.toLowerCase()}@sipena.test');
+  await _fillField(tester, 'login-password', 'simulasi');
+  await tester.ensureVisible(find.byKey(const Key('login-submit')));
+  await tester.tap(find.byKey(const Key('login-submit')));
+  await tester.pumpAndSettle();
+}
+
 void main() {
+  testWidgets('login validates credentials and opens selected dashboard', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const SipenaApp());
+
+    expect(find.byType(LoginPage), findsOneWidget);
+    expect(find.byKey(const Key('login-email')), findsOneWidget);
+    expect(find.byKey(const Key('login-password')), findsOneWidget);
+    expect(find.byKey(const Key('login-role-selector')), findsOneWidget);
+
+    await tester.ensureVisible(find.byKey(const Key('login-submit')));
+    await tester.tap(find.byKey(const Key('login-submit')));
+    await tester.pumpAndSettle();
+    expect(find.text('Email wajib diisi.'), findsOneWidget);
+    expect(find.text('Password wajib diisi.'), findsOneWidget);
+
+    await tester.tap(find.text('Admin'));
+    await _fillField(tester, 'login-email', 'admin@sipena.test');
+    await _fillField(tester, 'login-password', 'apa-saja');
+    await tester.ensureVisible(find.byKey(const Key('login-submit')));
+    await tester.tap(find.byKey(const Key('login-submit')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LoginPage), findsNothing);
+    expect(find.text('ADMIN'), findsOneWidget);
+    expect(find.textContaining('admin@sipena.test'), findsOneWidget);
+  });
+
+  testWidgets('registration validates fields and returns to login', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(const SipenaApp());
+
+    await tester.tap(find.text('Daftar di sini'));
+    await tester.pumpAndSettle();
+    expect(find.byType(RegistrationPage), findsOneWidget);
+    for (final key in [
+      'register-name',
+      'register-nim',
+      'register-program',
+      'register-email',
+      'register-password',
+    ]) {
+      expect(find.byKey(Key(key)), findsOneWidget);
+    }
+
+    await tester.ensureVisible(find.byKey(const Key('register-submit')));
+    await tester.tap(find.byKey(const Key('register-submit')));
+    await tester.pumpAndSettle();
+    expect(find.text('Nama lengkap wajib diisi.'), findsOneWidget);
+
+    await _fillField(tester, 'register-name', 'Anita Mahasiswa');
+    await _fillField(tester, 'register-nim', '2210101001');
+    await _fillField(tester, 'register-program', 'Informatika');
+    await _fillField(tester, 'register-email', 'anita@sipena.test');
+    await _fillField(tester, 'register-password', 'password123');
+    await tester.ensureVisible(find.byKey(const Key('register-submit')));
+    await tester.tap(find.byKey(const Key('register-submit')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(RegistrationPage), findsNothing);
+    expect(find.byType(LoginPage), findsOneWidget);
+    expect(
+      find.text('Pendaftaran simulasi berhasil. Silakan masuk.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('registration login link returns to the login screen', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(const SipenaApp());
+    await tester.ensureVisible(find.text('Daftar di sini'));
+    await tester.tap(find.text('Daftar di sini'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Login di sini'));
+    await tester.tap(find.text('Login di sini'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(RegistrationPage), findsNothing);
+    expect(find.byType(LoginPage), findsOneWidget);
+  });
+
+  testWidgets('auth card is centered on desktop and fits mobile width', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const SipenaApp());
+    final desktopCard = find.byKey(const Key('auth-card'));
+    final desktopSize = tester.getSize(desktopCard);
+    final desktopPosition = tester.getTopLeft(desktopCard);
+    expect(desktopSize.width, lessThanOrEqualTo(460));
+    expect(desktopPosition.dx + desktopSize.width / 2, closeTo(720, 1));
+
+    tester.view.physicalSize = const Size(390, 844);
+    await tester.pumpWidget(const SipenaApp());
+    final mobileCard = find.byKey(const Key('auth-card'));
+    final mobileSize = tester.getSize(mobileCard);
+    expect(mobileSize.width, lessThanOrEqualTo(358));
+    expect(mobileSize.width, greaterThan(300));
+
+    await tester.ensureVisible(find.text('Daftar di sini'));
+    await tester.tap(find.text('Daftar di sini'));
+    await tester.pumpAndSettle();
+    final registrationSize = tester.getSize(find.byKey(const Key('auth-card')));
+    expect(registrationSize.width, lessThanOrEqualTo(358));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('admin dashboard uses desktop navigation at laptop width', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await _signInAs(tester, 'Admin');
+
+    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.text('Pengaturan'), findsOneWidget);
+    await tester.tap(find.text('Penelitian').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Daftar Penelitian'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('student manages only personal activities across four tabs', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await _signInAs(tester, 'Mahasiswa');
+
+    expect(find.text('Kegiatan'), findsOneWidget);
+    expect(find.text('Tambah'), findsOneWidget);
+    expect(find.text('Profil'), findsOneWidget);
+    expect(find.textContaining('mahasiswa@sipena.test'), findsOneWidget);
+    expect(
+      find.text('Pengembangan Aplikasi Literasi Digital untuk Mahasiswa'),
+      findsNothing,
+    );
+    expect(find.text('00'), findsNWidgets(3));
+
+    await _selectTab(tester, 'Tambah');
+    await tester.tap(find.byKey(const Key('student-add-penelitian')));
+    await tester.pumpAndSettle();
+    expect(find.byType(ActivityFormPage), findsOneWidget);
+    expect(find.byKey(const Key('field-location')), findsOneWidget);
+    await _fillField(tester, 'field-title', 'Riset Mahasiswa Mandiri');
+    await _fillField(tester, 'field-student-name', 'Mahasiswa Tes');
+    await _fillField(tester, 'field-student-id', '2310101099');
+    await _fillField(tester, 'field-study-program', 'Informatika');
+    await _fillField(tester, 'field-supervisor', 'Dr. Pembimbing');
+    await _fillField(tester, 'field-location', 'Laboratorium Kampus');
+    await _fillField(tester, 'field-year', '2026');
+    await _fillField(tester, 'field-description', 'Deskripsi kegiatan tes.');
+    await tester.ensureVisible(find.text('Simpan Data'));
+    await tester.tap(find.text('Simpan Data'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Riset Mahasiswa Mandiri'), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('student-activity-search')),
+      'mandiri',
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Riset Mahasiswa Mandiri'), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('student-activity-search')),
+      'judul tidak ada',
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Riset Mahasiswa Mandiri'), findsNothing);
+    await tester.enterText(
+      find.byKey(const Key('student-activity-search')),
+      '',
+    );
+    await tester.tap(find.byKey(const Key('student-filter-pengabdian')));
+    await tester.pumpAndSettle();
+    expect(find.text('Riset Mahasiswa Mandiri'), findsNothing);
+    await tester.tap(find.byKey(const Key('student-filter-all')));
+    await tester.pumpAndSettle();
+
+    final activityDetail = find.byKey(const Key('activity-detail-5'));
+    await tester.ensureVisible(activityDetail);
+    await tester.tap(activityDetail);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('detail-edit-5')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('detail-edit-5')));
+    await tester.pumpAndSettle();
+    await _fillField(tester, 'field-title', 'Riset Mahasiswa Diperbarui');
+    await tester.ensureVisible(find.text('Simpan Perubahan'));
+    await tester.tap(find.text('Simpan Perubahan'));
+    await tester.pumpAndSettle();
+    expect(find.text('Riset Mahasiswa Diperbarui'), findsOneWidget);
+
+    final updatedDetail = find.byKey(const Key('activity-detail-5'));
+    await tester.ensureVisible(updatedDetail);
+    await tester.tap(updatedDetail);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('detail-delete-5')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.widgetWithText(FilledButton, 'Hapus'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Riset Mahasiswa Diperbarui'), findsNothing);
+
+    await _selectTab(tester, 'Tambah');
+    await tester.tap(find.byKey(const Key('student-add-pengabdian')));
+    await tester.pumpAndSettle();
+    await _fillField(tester, 'field-title', 'Edukasi Digital Warga');
+    await _fillField(tester, 'field-student-name', 'Mahasiswa Tes');
+    await _fillField(tester, 'field-student-id', '2310101099');
+    await _fillField(tester, 'field-study-program', 'Informatika');
+    await _fillField(tester, 'field-supervisor', 'Dr. Pembimbing');
+    await _fillField(tester, 'field-location', 'Kelurahan Sukamaju');
+    await _fillField(tester, 'field-year', '2026');
+    await _fillField(tester, 'field-description', 'Pelatihan untuk warga.');
+    await tester.ensureVisible(find.text('Simpan Data'));
+    await tester.tap(find.text('Simpan Data'));
+    await tester.pumpAndSettle();
+    expect(find.text('Edukasi Digital Warga'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('student-filter-penelitian')));
+    await tester.pumpAndSettle();
+    expect(find.text('Edukasi Digital Warga'), findsNothing);
+    await tester.tap(find.byKey(const Key('student-filter-pengabdian')));
+    await tester.pumpAndSettle();
+    expect(find.text('Edukasi Digital Warga'), findsOneWidget);
+
+    await _selectTab(tester, 'Profil');
+    expect(find.text('Profil Mahasiswa'), findsOneWidget);
+    expect(find.text('Pengaturan'), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('student-logout')));
+    await tester.tap(find.byKey(const Key('student-logout')));
+    await tester.pumpAndSettle();
+    expect(find.text('Keluar dari akun?'), findsOneWidget);
+    await tester.tap(find.text('Batal'));
+    await tester.pumpAndSettle();
+    expect(find.byType(LoginPage), findsNothing);
+    await tester.ensureVisible(find.byKey(const Key('student-logout')));
+    await tester.tap(find.byKey(const Key('student-logout')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('student-logout-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.byType(LoginPage), findsOneWidget);
+  });
+
+  testWidgets('student profile information can be edited in the session', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await _signInAs(tester, 'Mahasiswa');
+    await _selectTab(tester, 'Profil');
+
+    expect(find.text('Belum diisi'), findsNWidgets(3));
+    await tester.tap(find.byKey(const Key('profile-edit')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('profile-edit-name')),
+      'Alya Putri',
+    );
+    await tester.enterText(
+      find.byKey(const Key('profile-edit-nim')),
+      '2310101001',
+    );
+    await tester.enterText(
+      find.byKey(const Key('profile-edit-program')),
+      'Informatika',
+    );
+    await tester.tap(find.byKey(const Key('profile-save')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Alya Putri'), findsOneWidget);
+    expect(find.text('2310101001'), findsOneWidget);
+    expect(find.text('Informatika'), findsOneWidget);
+    await _selectTab(tester, 'Beranda');
+    expect(find.text('Selamat Datang, Alya Putri'), findsOneWidget);
+  });
+
+  testWidgets('student sees sample notifications and profile help actions', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await _signInAs(tester, 'Mahasiswa');
+
+    expect(find.byKey(const Key('student-notification-badge')), findsOneWidget);
+    expect(find.text('4'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('student-notification-bell')));
+    await tester.pumpAndSettle();
+    expect(find.byType(StudentNotificationsPage), findsOneWidget);
+    expect(find.text('Menunggu Validasi'), findsOneWidget);
+    expect(find.text('Tervalidasi'), findsOneWidget);
+    expect(find.text('Perlu Revisi'), findsOneWidget);
+    expect(find.text('Ditolak'), findsOneWidget);
+    expect(find.textContaining('bukan status nyata'), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('student-notification-badge')), findsNothing);
+
+    await _selectTab(tester, 'Profil');
+    await tester.tap(find.byKey(const Key('student-help')));
+    await tester.pumpAndSettle();
+    expect(find.text('Bantuan SIPENA'), findsOneWidget);
+    await tester.tap(find.text('Tutup'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.byKey(const Key('student-feedback')));
+    await tester.tap(find.byKey(const Key('student-feedback')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('feedback-message')),
+      'Mohon tambahkan informasi status kegiatan.',
+    );
+    await tester.tap(find.byKey(const Key('feedback-submit')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Terima kasih. Feedback simulasi tidak dikirim ke server.'),
+      findsOneWidget,
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('student-about')));
+    await tester.tap(find.byKey(const Key('student-about')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tentang SIPENA'), findsNWidgets(2));
+    await tester.tap(find.text('Tutup'));
+  });
+
   testWidgets('edit form views, preserves, replaces, and removes documents', (
     WidgetTester tester,
   ) async {
@@ -150,9 +512,12 @@ void main() {
     await tester.pumpAndSettle();
     final removeButton = find.byKey(const Key('edit-document-remove-0'));
     await tester.ensureVisible(removeButton);
+    await tester.drag(find.byType(ListView).last, const Offset(0, -320));
+    await tester.pumpAndSettle();
     await tester.tap(removeButton);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('document-empty')), findsOneWidget);
+    await tester.ensureVisible(find.text('Simpan Perubahan'));
     await tester.tap(find.text('Simpan Perubahan'));
     await tester.pumpAndSettle();
     expect(find.text('Tersimpan: tanpa dokumen'), findsOneWidget);
@@ -171,12 +536,12 @@ void main() {
       ),
     );
 
-    expect(find.byType(TextFormField), findsNWidgets(8));
+    expect(find.byType(TextFormField), findsNWidgets(9));
     expect(find.byKey(const Key('field-title')), findsOneWidget);
   });
 
   testWidgets('shows SIPENA dashboard content', (WidgetTester tester) async {
-    await tester.pumpWidget(const SipenaApp());
+    await _signInAs(tester, 'Admin');
 
     expect(find.text('SIPENA'), findsOneWidget);
     expect(find.text('Selamat Datang di SIPENA'), findsOneWidget);
@@ -207,14 +572,14 @@ void main() {
   testWidgets('research supports add, detail, edit, and delete', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const SipenaApp());
+    await _signInAs(tester, 'Admin');
     await _selectTab(tester, 'Penelitian');
 
     await tester.tap(find.byTooltip('Tambah penelitian'));
     await tester.pumpAndSettle();
     expect(find.text('Tambah Penelitian'), findsOneWidget);
     expect(find.byType(ActivityFormPage), findsOneWidget);
-    expect(find.byType(TextFormField), findsNWidgets(8));
+    expect(find.byType(TextFormField), findsNWidgets(9));
     expect(find.byKey(const Key('field-title')), findsOneWidget);
 
     await _fillField(tester, 'field-title', 'Riset Air Bersih Kampus');
@@ -279,7 +644,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(const SipenaApp());
+    await _signInAs(tester, 'Admin');
     await _selectTab(tester, 'Pengabdian');
 
     await tester.tap(find.byTooltip('Tambah pengabdian'));
@@ -325,7 +690,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(const SipenaApp());
+      await _signInAs(tester, 'Admin');
       await _selectTab(tester, 'Penelitian');
       await tester.tap(find.byKey(const Key('activity-detail-1')));
       await tester.pumpAndSettle();
@@ -347,7 +712,7 @@ void main() {
   testWidgets('home search matches activity title and student name', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const SipenaApp());
+    await _signInAs(tester, 'Admin');
     await tester.enterText(find.byKey(const Key('activity-search')), 'Dimas');
     await tester.pumpAndSettle();
     expect(find.text('Dimas Aditya Nugraha'), findsOneWidget);
@@ -365,7 +730,7 @@ void main() {
   testWidgets('settings toggles global dark mode and opens help dialogs', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const SipenaApp());
+    await _signInAs(tester, 'Admin');
     await _selectTab(tester, 'Pengaturan');
 
     expect(find.text('Pengaturan'), findsNWidgets(2));
@@ -402,7 +767,8 @@ void main() {
     );
     await _selectTab(tester, 'Beranda');
     expect(
-      Theme.of(tester.element(find.text('Selamat Datang di SIPENA'))).brightness,
+      Theme.of(tester.element(find.text('Selamat Datang di SIPENA')))
+          .brightness,
       Brightness.dark,
     );
     await _selectTab(tester, 'Pengaturan');
@@ -464,7 +830,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const SipenaApp());
+    await _signInAs(tester, 'Admin');
 
     expect(tester.takeException(), isNull);
     expect(find.text('Selamat Datang di SIPENA'), findsOneWidget);

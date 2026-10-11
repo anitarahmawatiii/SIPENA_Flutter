@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 
 import 'activity_pages.dart';
+import 'sipena_design.dart';
 
 class ActivityDetailPage extends StatelessWidget {
   const ActivityDetailPage({
     super.key,
     required this.activity,
-    required this.onEdit,
-    required this.onDelete,
+    this.onEdit,
+    this.onDelete,
   });
 
   final ActivityEntry activity;
-  final Future<void> Function() onEdit;
-  final Future<bool> Function() onDelete;
+  final Future<void> Function()? onEdit;
+  final Future<bool> Function()? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +33,8 @@ class ActivityDetailPage extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(detailTitle),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(title: Text(detailTitle)),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -123,7 +122,7 @@ class ActivityDetailPage extends StatelessWidget {
                         title: 'Dokumen Pendukung',
                         icon: Icons.attach_file_rounded,
                         child: activity.documents.isEmpty
-                          ? const _NoDocuments()
+                            ? const _NoDocuments()
                             : Column(
                                 children: activity.documents
                                     .map(
@@ -147,61 +146,66 @@ class ActivityDetailPage extends StatelessWidget {
           },
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-        child: Align(
-          alignment: Alignment.center,
-          heightFactor: 1,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 840),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    key: Key('detail-edit-${activity.id}'),
-                    onPressed: () async {
-                      await onEdit();
-                      if (context.mounted) Navigator.of(context).pop();
-                    },
-                    icon: const Icon(Icons.edit_outlined),
-                    label: const Text('Edit'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF1557A6),
-                      minimumSize: const Size.fromHeight(50),
-                      side: const BorderSide(color: Color(0xFFB8CBE2)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
+      bottomNavigationBar: onEdit == null && onDelete == null
+          ? null
+          : SafeArea(
+              minimum: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+              child: Align(
+                alignment: Alignment.center,
+                heightFactor: 1,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 840),
+                  child: Row(
+                    children: [
+                      if (onEdit != null)
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            key: Key('detail-edit-${activity.id}'),
+                            onPressed: () async {
+                              await onEdit!();
+                              if (context.mounted) Navigator.of(context).pop();
+                            },
+                            icon: const Icon(Icons.edit_outlined),
+                            label: const Text('Edit'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: SipenaPalette.navy,
+                              minimumSize: const Size.fromHeight(50),
+                              side: const BorderSide(color: Color(0xFFB8CBE2)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (onEdit != null && onDelete != null)
+                        const SizedBox(width: 12),
+                      if (onDelete != null)
+                        Expanded(
+                          child: FilledButton.icon(
+                            key: Key('detail-delete-${activity.id}'),
+                            onPressed: () async {
+                              final deleted = await onDelete!();
+                              if (deleted && context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            icon: const Icon(Icons.delete_outline_rounded),
+                            label: const Text('Hapus'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: SipenaPalette.red,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size.fromHeight(50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.icon(
-                    key: Key('detail-delete-${activity.id}'),
-                    onPressed: () async {
-                      final deleted = await onDelete();
-                      if (deleted && context.mounted) {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    icon: const Icon(Icons.delete_outline_rounded),
-                    label: const Text('Hapus'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFFB23B3B),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -214,83 +218,124 @@ class _DetailHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: context.sipenaCardColor,
-        border: Border.all(color: context.sipenaBorderColor),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 520;
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(compact ? 20 : 26),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [SipenaPalette.navy, Color(0xFF245B9A)],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x1D173B70),
+                blurRadius: 18,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
             children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: activity.type.tint,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  activity.type.icon,
-                  color: activity.type.color,
-                  size: 26,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            activity.type.label.toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'TAHUN ${activity.year}',
+                          style: const TextStyle(
+                            color: Color(0xFFD0DFF1),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      activity.title,
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            height: 1.25,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.calendar_today_outlined,
+                          color: Color(0xFFD0DFF1),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            date,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 11,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: activity.type.tint,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  activity.type.label.toUpperCase(),
-                  style: TextStyle(
-                    color: activity.type.color,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
+              if (!compact) ...[
+                const SizedBox(width: 20),
+                Container(
+                  width: 104,
+                  height: 104,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.18),
+                    ),
+                  ),
+                  child: Icon(
+                    activity.type.icon,
+                    color: Colors.white,
+                    size: 48,
                   ),
                 ),
-              ),
+              ],
             ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            activity.title,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: context.sipenaHeadingColor,
-              fontWeight: FontWeight.w700,
-              height: 1.25,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_today_outlined,
-                color: context.sipenaMutedTextColor,
-                size: 17,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                date,
-                style: TextStyle(
-                  color: context.sipenaMutedTextColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -308,20 +353,14 @@ class _DetailSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
+    return SipenaSurfaceCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: context.sipenaCardColor,
-        border: Border.all(color: context.sipenaBorderColor),
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: const Color(0xFF1557A6), size: 20),
+              Icon(icon, color: SipenaPalette.blue, size: 20),
               const SizedBox(width: 9),
               Expanded(
                 child: Text(
@@ -395,8 +434,10 @@ class _InformationTile extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 78),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: context.sipenaInsetColor,
-        borderRadius: BorderRadius.circular(9),
+        color: context.isSipenaDark
+            ? SipenaPalette.darkSection
+            : SipenaPalette.section,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -444,7 +485,7 @@ class _NoDocuments extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
       decoration: BoxDecoration(
         color: context.sipenaInsetColor,
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
@@ -479,7 +520,7 @@ class _DocumentAttachment extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: context.sipenaInsetColor,
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: context.sipenaBorderColor),
       ),
       child: Row(
@@ -491,9 +532,11 @@ class _DocumentAttachment extends StatelessWidget {
               color: context.sipenaAccentSurfaceColor,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
-              Icons.picture_as_pdf_outlined,
-              color: Color(0xFF1557A6),
+            child: Icon(
+              document.fileType.toLowerCase() == 'pdf'
+                  ? Icons.picture_as_pdf_outlined
+                  : Icons.insert_drive_file_outlined,
+              color: SipenaPalette.blue,
               size: 22,
             ),
           ),

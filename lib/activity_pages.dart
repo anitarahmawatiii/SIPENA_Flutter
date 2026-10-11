@@ -1,44 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
+import 'sipena_design.dart';
+
 extension SipenaThemeColors on BuildContext {
   bool get isSipenaDark => Theme.of(this).brightness == Brightness.dark;
 
-  Color get sipenaCardColor => isSipenaDark
-    ? const Color(0xFF1B2838)
-    : Colors.white;
+  Color get sipenaCardColor =>
+      isSipenaDark ? const Color(0xFF1B2838) : Colors.white;
 
-  Color get sipenaInsetColor => isSipenaDark
-    ? const Color(0xFF253447)
-    : const Color(0xFFF7F9FC);
+  Color get sipenaInsetColor =>
+      isSipenaDark ? const Color(0xFF253447) : const Color(0xFFF7F9FC);
 
-  Color get sipenaBorderColor => isSipenaDark
-    ? const Color(0xFF384B61)
-    : const Color(0xFFE4EAF1);
+  Color get sipenaBorderColor =>
+      isSipenaDark ? const Color(0xFF384B61) : SipenaPalette.line;
 
-  Color get sipenaInputBorderColor => isSipenaDark
-    ? const Color(0xFF455970)
-    : const Color(0xFFE1E7EF);
+  Color get sipenaInputBorderColor =>
+      isSipenaDark ? const Color(0xFF455970) : const Color(0xFFE1E7EF);
 
-  Color get sipenaHeadingColor => isSipenaDark
-    ? const Color(0xFFEAF1F8)
-    : const Color(0xFF17324F);
+  Color get sipenaHeadingColor =>
+      isSipenaDark ? const Color(0xFFEAF1F8) : SipenaPalette.ink;
 
-  Color get sipenaTextColor => isSipenaDark
-    ? const Color(0xFFD5DFEA)
-    : const Color(0xFF34475E);
+  Color get sipenaTextColor =>
+      isSipenaDark ? const Color(0xFFD5DFEA) : SipenaPalette.body;
 
-  Color get sipenaMutedTextColor => isSipenaDark
-    ? const Color(0xFFA6B5C7)
-    : const Color(0xFF718096);
+  Color get sipenaMutedTextColor =>
+      isSipenaDark ? const Color(0xFFA6B5C7) : SipenaPalette.muted;
 
-  Color get sipenaSubtleTextColor => isSipenaDark
-    ? const Color(0xFF91A2B7)
-    : const Color(0xFF8290A1);
+  Color get sipenaSubtleTextColor =>
+      isSipenaDark ? const Color(0xFF91A2B7) : const Color(0xFF8290A1);
 
-  Color get sipenaAccentSurfaceColor => isSipenaDark
-    ? const Color(0xFF203750)
-    : const Color(0xFFE8F1FC);
+  Color get sipenaAccentSurfaceColor =>
+      isSipenaDark ? SipenaPalette.darkSection : SipenaPalette.paleBlue;
 }
 
 enum ActivityType { penelitian, pengabdian }
@@ -55,13 +48,13 @@ extension ActivityTypePresentation on ActivityType {
   };
 
   Color get color => switch (this) {
-    ActivityType.penelitian => const Color(0xFF1557A6),
-    ActivityType.pengabdian => const Color(0xFF21836B),
+    ActivityType.penelitian => SipenaPalette.blue,
+    ActivityType.pengabdian => SipenaPalette.teal,
   };
 
   Color get tint => switch (this) {
-    ActivityType.penelitian => const Color(0xFFE9F1FC),
-    ActivityType.pengabdian => const Color(0xFFE8F5F0),
+    ActivityType.penelitian => SipenaPalette.paleBlue,
+    ActivityType.pengabdian => SipenaPalette.paleTeal,
   };
 }
 
@@ -138,15 +131,15 @@ class ActivityCollectionPage extends StatelessWidget {
     required this.type,
     required this.items,
     required this.onDetail,
-    required this.onEdit,
-    required this.onDelete,
+    this.onEdit,
+    this.onDelete,
   });
 
   final ActivityType type;
   final List<ActivityEntry> items;
   final ValueChanged<ActivityEntry> onDetail;
-  final ValueChanged<ActivityEntry> onEdit;
-  final ValueChanged<ActivityEntry> onDelete;
+  final ValueChanged<ActivityEntry>? onEdit;
+  final ValueChanged<ActivityEntry>? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -168,13 +161,129 @@ class ActivityCollectionPage extends StatelessWidget {
                       child: _ActivityCard(
                         item: item,
                         onDetail: () => onDetail(item),
-                        onEdit: () => onEdit(item),
-                        onDelete: () => onDelete(item),
+                        onEdit: onEdit == null ? null : () => onEdit!(item),
+                        onDelete: onDelete == null
+                            ? null
+                            : () => onDelete!(item),
                       ),
                     ),
                   )
                   .toList(),
             ),
+    );
+  }
+}
+
+class StudentActivityManagementPage extends StatefulWidget {
+  const StudentActivityManagementPage({
+    super.key,
+    required this.items,
+    required this.onDetail,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final List<ActivityEntry> items;
+  final ValueChanged<ActivityEntry> onDetail;
+  final ValueChanged<ActivityEntry> onEdit;
+  final ValueChanged<ActivityEntry> onDelete;
+
+  @override
+  State<StudentActivityManagementPage> createState() =>
+      _StudentActivityManagementPageState();
+}
+
+class _StudentActivityManagementPageState
+    extends State<StudentActivityManagementPage> {
+  final _searchController = TextEditingController();
+  ActivityType? _selectedType;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final query = _searchController.text.trim().toLowerCase();
+    final filteredItems = widget.items.where((item) {
+      final matchesType = _selectedType == null || item.type == _selectedType;
+      final matchesQuery =
+          query.isEmpty ||
+          item.title.toLowerCase().contains(query) ||
+          item.type.label.toLowerCase().contains(query) ||
+          item.description.toLowerCase().contains(query);
+      return matchesType && matchesQuery;
+    }).toList()..sort((a, b) => b.activityDate.compareTo(a.activityDate));
+
+    return _ActivityPageLayout(
+      title: 'Kegiatan Saya',
+      subtitle: 'Kelola penelitian dan pengabdian yang Anda daftarkan',
+      count: filteredItems.length,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            key: const Key('student-activity-search'),
+            controller: _searchController,
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              hintText: 'Cari judul atau kategori kegiatan',
+              prefixIcon: const Icon(Icons.search_rounded),
+              filled: true,
+              fillColor: context.sipenaInsetColor,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: context.sipenaInputBorderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: context.sipenaInputBorderColor),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ChoiceChip(
+                key: const Key('student-filter-all'),
+                label: const Text('Semua'),
+                selected: _selectedType == null,
+                onSelected: (_) => setState(() => _selectedType = null),
+              ),
+              for (final type in ActivityType.values)
+                ChoiceChip(
+                  key: Key('student-filter-${type.name}'),
+                  label: Text(type.label),
+                  selected: _selectedType == type,
+                  onSelected: (_) => setState(() => _selectedType = type),
+                ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          if (filteredItems.isEmpty)
+            _EmptyActivities(
+              message: widget.items.isEmpty
+                  ? 'Belum ada kegiatan. Tambahkan kegiatan pertama Anda.'
+                  : 'Tidak ada kegiatan yang sesuai dengan filter.',
+            )
+          else
+            ...filteredItems.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _ActivityCard(
+                  item: item,
+                  onDetail: () => widget.onDetail(item),
+                  onEdit: () => widget.onEdit(item),
+                  onDelete: () => widget.onDelete(item),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -219,7 +328,7 @@ class _HomeActivitySearchState extends State<HomeActivitySearch> {
             hintText: 'Cari kegiatan atau nama mahasiswa',
             prefixIcon: const Icon(Icons.search_rounded),
             filled: true,
-            fillColor: context.sipenaCardColor,
+            fillColor: context.sipenaInsetColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: context.sipenaInputBorderColor),
@@ -231,7 +340,7 @@ class _HomeActivitySearchState extends State<HomeActivitySearch> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(
-                color: Color(0xFF1557A6),
+                color: SipenaPalette.blue,
                 width: 1.5,
               ),
             ),
@@ -328,13 +437,13 @@ class _ActivityPageLayout extends StatelessWidget {
                           vertical: 7,
                         ),
                         decoration: BoxDecoration(
-                          color: context.sipenaAccentSurfaceColor,
-                          borderRadius: BorderRadius.circular(20),
+                          color: SipenaPalette.navy,
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '$count data',
+                          '$count KEGIATAN',
                           style: const TextStyle(
-                            color: Color(0xFF1557A6),
+                            color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
@@ -371,7 +480,7 @@ class _ActivityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: context.sipenaCardColor,
         border: Border.all(color: context.sipenaBorderColor),
@@ -383,61 +492,96 @@ class _ActivityCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: item.type.tint,
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: Icon(item.type.icon, color: item.type.color, size: 21),
+              SipenaIconTile(
+                icon: item.type.icon,
+                color: item.type.color,
+                background: item.type.tint,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       item.title,
-                      style: TextStyle(
-                        color: context.sipenaTextColor,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        height: 1.35,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      '${item.type.label}  •  ${item.year}',
-                      style: TextStyle(
-                        color: item.type.color,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: item.type.tint,
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          child: Text(
+                            item.type.label,
+                            style: TextStyle(
+                              color: item.type.color,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Tahun ${item.year}',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: context.sipenaMutedTextColor),
+                        ),
+                        if (item.activityDate.isNotEmpty)
+                          Text(
+                            formatActivityDate(item.activityDate),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: context.sipenaMutedTextColor),
+                          ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            children: [
+              _ActivityMeta(
+                icon: Icons.person_outline_rounded,
+                text: item.studentName,
+              ),
+              if (item.studentId.isNotEmpty)
+                _ActivityMeta(icon: Icons.badge_outlined, text: item.studentId),
+              if (item.studyProgram.isNotEmpty)
+                _ActivityMeta(
+                  icon: Icons.school_outlined,
+                  text: item.studyProgram,
+                ),
+              if (item.location.isNotEmpty)
+                _ActivityMeta(
+                  icon: Icons.location_on_outlined,
+                  text: item.location,
+                ),
+            ],
+          ),
+          if (item.description.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              item.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: context.sipenaMutedTextColor),
+            ),
+          ],
           const SizedBox(height: 12),
-          Text(
-            item.studentName,
-            style: TextStyle(
-              color: context.sipenaTextColor,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            '${item.studentId}  •  ${item.studyProgram}',
-            style: TextStyle(
-              color: context.sipenaSubtleTextColor,
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 10),
           Wrap(
             spacing: 2,
             runSpacing: 0,
@@ -459,6 +603,7 @@ class _ActivityCard extends StatelessWidget {
                   icon: const Icon(Icons.edit_outlined, size: 17),
                   label: const Text('Edit'),
                   style: TextButton.styleFrom(
+                    foregroundColor: SipenaPalette.navy,
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
@@ -467,10 +612,10 @@ class _ActivityCard extends StatelessWidget {
                 TextButton.icon(
                   key: Key('activity-delete-${item.id}'),
                   onPressed: onDelete,
-                  icon: const Icon(Icons.delete_outline, size: 17),
+                  icon: const Icon(Icons.delete_outline_rounded, size: 17),
                   label: const Text('Hapus'),
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFFB23B3B),
+                    foregroundColor: SipenaPalette.red,
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
@@ -479,6 +624,29 @@ class _ActivityCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ActivityMeta extends StatelessWidget {
+  const _ActivityMeta({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 15, color: context.sipenaSubtleTextColor),
+        const SizedBox(width: 5),
+        Text(
+          text,
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: context.sipenaTextColor),
+        ),
+      ],
     );
   }
 }
@@ -494,9 +662,9 @@ class _EmptyActivities extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 36),
       decoration: BoxDecoration(
-        color: context.sipenaCardColor,
+        color: context.sipenaInsetColor,
         border: Border.all(color: context.sipenaBorderColor),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         children: [
@@ -509,10 +677,7 @@ class _EmptyActivities extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: context.sipenaMutedTextColor,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: context.sipenaMutedTextColor, fontSize: 13),
           ),
         ],
       ),
@@ -536,6 +701,51 @@ class ActivityFormPage extends StatefulWidget {
 
   @override
   State<ActivityFormPage> createState() => _ActivityFormPageState();
+}
+
+class _FormGroupHeading extends StatelessWidget {
+  const _FormGroupHeading({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SipenaIconTile(
+            icon: icon,
+            color: SipenaPalette.navy,
+            background: SipenaPalette.paleBlue,
+            size: 38,
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: context.sipenaMutedTextColor),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _ActivityFormPageState extends State<ActivityFormPage> {
@@ -700,7 +910,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
 
   Widget _documentSection() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -797,8 +1007,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                         ),
                         TextButton.icon(
                           key: Key('edit-document-replace-$index'),
-                          onPressed: () =>
-                              _selectDocument(replaceIndex: index),
+                          onPressed: () => _selectDocument(replaceIndex: index),
                           icon: const Icon(Icons.swap_horiz_rounded, size: 16),
                           label: const Text('Ganti File'),
                           style: TextButton.styleFrom(
@@ -807,9 +1016,8 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                         ),
                         TextButton.icon(
                           key: Key('edit-document-remove-$index'),
-                          onPressed: () => setState(
-                            () => _documents.removeAt(index),
-                          ),
+                          onPressed: () =>
+                              setState(() => _documents.removeAt(index)),
                           icon: const Icon(Icons.delete_outline, size: 16),
                           label: const Text('Hapus'),
                           style: TextButton.styleFrom(
@@ -829,9 +1037,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
               key: const Key('edit-document-add'),
               onPressed: () => _selectDocument(),
               icon: const Icon(Icons.attach_file_rounded, size: 18),
-              label: Text(
-                _documents.isEmpty ? 'Pilih File' : 'Tambah Dokumen',
-              ),
+              label: Text(_documents.isEmpty ? 'Pilih File' : 'Tambah Dokumen'),
             ),
           ),
         ],
@@ -873,7 +1079,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     int maxLines = 1,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 6),
       child: TextFormField(
         key: Key(keyName),
         controller: controller,
@@ -885,18 +1091,22 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
           labelText: label,
           alignLabelWithHint: maxLines > 1,
           filled: true,
-          fillColor: context.sipenaCardColor,
+          fillColor: context.sipenaInsetColor,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 9,
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(9),
             borderSide: BorderSide(color: context.sipenaInputBorderColor),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(9),
             borderSide: BorderSide(color: context.sipenaInputBorderColor),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF1557A6), width: 1.5),
+            borderRadius: BorderRadius.circular(9),
+            borderSide: const BorderSide(color: SipenaPalette.blue, width: 1.5),
           ),
         ),
       ),
@@ -905,7 +1115,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
 
   Widget _dateField() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 8),
       child: TextFormField(
         key: const Key('field-date'),
         controller: _dateController,
@@ -918,18 +1128,22 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
               : 'Tanggal kegiatan',
           suffixIcon: const Icon(Icons.calendar_month_outlined),
           filled: true,
-          fillColor: context.sipenaCardColor,
+          fillColor: context.sipenaInsetColor,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 9,
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(9),
             borderSide: BorderSide(color: context.sipenaInputBorderColor),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(9),
             borderSide: BorderSide(color: context.sipenaInputBorderColor),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF1557A6), width: 1.5),
+            borderRadius: BorderRadius.circular(9),
+            borderSide: const BorderSide(color: SipenaPalette.blue, width: 1.5),
           ),
         ),
       ),
@@ -947,13 +1161,20 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 88),
             children: [
               Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 640),
                   child: Column(
                     children: [
+                      _FormGroupHeading(
+                        icon: widget.type.icon,
+                        title: 'Identitas Kegiatan',
+                        subtitle:
+                            'Informasi kegiatan, pengusul, dan pembimbing.',
+                      ),
+                      const SizedBox(height: 8),
                       _field(
                         label: widget.type == ActivityType.penelitian
                             ? 'Judul penelitian'
@@ -988,14 +1209,22 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                         controller: _supervisorController,
                         validator: _required,
                       ),
+                      const SizedBox(height: 2),
+                      const _FormGroupHeading(
+                        icon: Icons.event_note_rounded,
+                        title: 'Pelaksanaan',
+                        subtitle: 'Tentukan waktu dan lokasi kegiatan.',
+                      ),
+                      const SizedBox(height: 8),
                       _dateField(),
-                      if (widget.type == ActivityType.pengabdian)
-                        _field(
-                          label: 'Lokasi kegiatan',
-                          keyName: 'field-location',
-                          controller: _locationController,
-                          validator: _required,
-                        ),
+                      _field(
+                        label: 'Lokasi kegiatan',
+                        keyName: 'field-location',
+                        controller: _locationController,
+                        validator: widget.type == ActivityType.pengabdian
+                            ? _required
+                            : (_) => null,
+                      ),
                       _field(
                         label: 'Tahun',
                         keyName: 'field-year',
@@ -1010,6 +1239,13 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                           return null;
                         },
                       ),
+                      const SizedBox(height: 2),
+                      const _FormGroupHeading(
+                        icon: Icons.subject_rounded,
+                        title: 'Deskripsi',
+                        subtitle: 'Ringkas tujuan dan rangkaian kegiatan.',
+                      ),
+                      const SizedBox(height: 8),
                       _field(
                         label: widget.type == ActivityType.penelitian
                             ? 'Deskripsi penelitian'
@@ -1017,7 +1253,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                         keyName: 'field-description',
                         controller: _descriptionController,
                         validator: (_) => null,
-                        maxLines: 4,
+                        maxLines: 2,
                       ),
                       _documentSection(),
                     ],
@@ -1043,7 +1279,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                 icon: const Icon(Icons.save_outlined),
                 label: Text(_isEditing ? 'Simpan Perubahan' : 'Simpan Data'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF1557A6),
+                  backgroundColor: SipenaPalette.blue,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
