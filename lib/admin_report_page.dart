@@ -7,9 +7,10 @@ import 'activity_pages.dart';
 import 'sipena_design.dart';
 
 class AdminReportPage extends StatefulWidget {
-  const AdminReportPage({super.key, required this.items});
+  const AdminReportPage({super.key, required this.items, required this.onBack});
 
   final List<ActivityEntry> items;
+  final VoidCallback onBack;
 
   @override
   State<AdminReportPage> createState() => _AdminReportPageState();
@@ -157,14 +158,35 @@ class _AdminReportPageState extends State<AdminReportPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Cetak Laporan',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      'Pilih cakupan laporan dan cetak atau simpan sebagai PDF.',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        IconButton(
+                          key: const Key('admin-page-back'),
+                          tooltip: 'Kembali',
+                          onPressed: widget.onBack,
+                          icon: const Icon(Icons.arrow_back_rounded),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Cetak Laporan',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall,
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                'Pilih cakupan laporan dan cetak atau simpan sebagai PDF.',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 22),
                     SipenaSurfaceCard(

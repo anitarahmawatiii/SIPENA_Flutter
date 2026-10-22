@@ -72,6 +72,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
+  final List<int> _navigationHistory = [];
   int _nextActivityId = 5;
   final List<ActivityEntry> _studentActivities = [];
   final Map<int, ActivityValidationStatus> _activityValidationStatuses = {};
@@ -149,6 +150,22 @@ class _DashboardPageState extends State<DashboardPage> {
   List<ActivityEntry> get _allItems => widget.role == SipenaRole.mahasiswa
       ? List.of(_studentActivities)
       : [..._researchItems, ..._communityItems];
+
+  void _navigateTo(int index) {
+    if (index == _selectedIndex) return;
+    setState(() {
+      _navigationHistory.add(_selectedIndex);
+      _selectedIndex = index;
+    });
+  }
+
+  void _goBack() {
+    setState(() {
+      _selectedIndex = _navigationHistory.isEmpty
+          ? 0
+          : _navigationHistory.removeLast();
+    });
+  }
 
   List<_StatData> get _stats => [
     _StatData(
@@ -344,7 +361,7 @@ class _DashboardPageState extends State<DashboardPage> {
               _DesktopSidebar(
                 role: widget.role,
                 selectedIndex: _selectedIndex,
-                onSelected: (index) => setState(() => _selectedIndex = index),
+                onSelected: _navigateTo,
               ),
             Expanded(
               child: AnimatedSwitcher(
@@ -363,8 +380,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       unreadNotificationCount: _sampleNotificationRead
                           .where((isRead) => !isRead)
                           .length,
-                      onNavigate: (index) =>
-                          setState(() => _selectedIndex = index),
+                      onNavigate: (index) => _navigateTo(index),
                       stats: _stats,
                       activities: _allItems,
                       onDetail: _openActivityDetail,
@@ -415,19 +431,19 @@ class _DashboardPageState extends State<DashboardPage> {
                           : _SettingsPage(
                               isDarkMode: widget.isDarkMode,
                               onDarkModeChanged: widget.onDarkModeChanged,
-                              onAdminNavigate: (index) =>
-                                  setState(() => _selectedIndex = index),
+                              onAdminNavigate: _navigateTo,
                             ),
                     4 => AdminValidationPage(
                       items: _allItems,
                       statuses: _activityValidationStatuses,
+                      onBack: _goBack,
                       onStatusChanged: (item, status) => setState(
                         () => _activityValidationStatuses[item.id] = status,
                       ),
                       onDetail: _openActivityDetail,
                     ),
-                    5 => const UserManagementPage(),
-                    6 => AdminReportPage(items: _allItems),
+                    5 => UserManagementPage(onBack: _goBack),
+                    6 => AdminReportPage(items: _allItems, onBack: _goBack),
                     _ => const SizedBox.shrink(),
                   },
                 ),
@@ -459,7 +475,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   ? _selectedIndex
                   : destinations.length - 1,
               onDestinationSelected: (index) {
-                setState(() => _selectedIndex = index);
+                _navigateTo(index);
               },
               backgroundColor: Theme.of(context).cardColor,
               indicatorColor: context.sipenaAccentSurfaceColor,
@@ -472,7 +488,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Future<void> _addStudentActivity(ActivityType type) async {
     await _openActivityForm(type);
     if (!mounted) return;
-    setState(() => _selectedIndex = 1);
+    _navigateTo(1);
   }
 }
 

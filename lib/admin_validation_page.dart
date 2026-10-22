@@ -26,12 +26,14 @@ class AdminValidationPage extends StatefulWidget {
     super.key,
     required this.items,
     required this.statuses,
+    required this.onBack,
     required this.onStatusChanged,
     required this.onDetail,
   });
 
   final List<ActivityEntry> items;
   final Map<int, ActivityValidationStatus> statuses;
+  final VoidCallback onBack;
   final void Function(ActivityEntry item, ActivityValidationStatus status)
   onStatusChanged;
   final ValueChanged<ActivityEntry> onDetail;
@@ -61,6 +63,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
     return _AdminPageBody(
       title: 'Validasi Kegiatan',
       subtitle: 'Tinjau dan tentukan status kegiatan yang diajukan mahasiswa.',
+      onBack: widget.onBack,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -256,11 +259,13 @@ class _AdminPageBody extends StatelessWidget {
   const _AdminPageBody({
     required this.title,
     required this.subtitle,
+    required this.onBack,
     required this.child,
   });
 
   final String title;
   final String subtitle;
+  final VoidCallback onBack;
   final Widget child;
 
   @override
@@ -281,14 +286,35 @@ class _AdminPageBody extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        IconButton(
+                          key: const Key('admin-page-back'),
+                          tooltip: 'Kembali',
+                          onPressed: onBack,
+                          icon: const Icon(Icons.arrow_back_rounded),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall,
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                subtitle,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 22),
                     child,

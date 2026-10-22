@@ -40,7 +40,9 @@ class _ManagedUser {
 }
 
 class UserManagementPage extends StatefulWidget {
-  const UserManagementPage({super.key});
+  const UserManagementPage({super.key, required this.onBack});
+
+  final VoidCallback onBack;
 
   @override
   State<UserManagementPage> createState() => _UserManagementPageState();
@@ -125,14 +127,35 @@ class _UserManagementPageState extends State<UserManagementPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Kelola Pengguna',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      'Cari akun, atur peran, dan aktifkan atau nonaktifkan akses.',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        IconButton(
+                          key: const Key('admin-page-back'),
+                          tooltip: 'Kembali',
+                          onPressed: widget.onBack,
+                          icon: const Icon(Icons.arrow_back_rounded),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Kelola Pengguna',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall,
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                'Cari akun, atur peran, dan aktifkan atau nonaktifkan akses.',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 22),
                     SipenaSurfaceCard(

@@ -212,7 +212,7 @@ void main() {
     await _signInAs(tester, 'Admin');
 
     expect(find.byType(NavigationBar), findsNothing);
-    expect(find.text('Pengaturan'), findsOneWidget);
+    expect(find.text('Pengaturan'), findsWidgets);
     await tester.tap(find.text('Penelitian').first);
     await tester.pumpAndSettle();
     expect(find.text('Daftar Penelitian'), findsOneWidget);
@@ -238,16 +238,25 @@ void main() {
     await tester.tap(find.text('Setujui').first);
     await tester.pumpAndSettle();
     expect(find.text('Disetujui'), findsWidgets);
+    await tester.tap(find.byKey(const Key('admin-page-back')));
+    await tester.pumpAndSettle();
+    expect(find.text('Ringkasan Kegiatan'), findsOneWidget);
 
     await tester.tap(find.text('Kelola Pengguna'));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('admin-user-search')), findsOneWidget);
     expect(find.text('Alya Putri Ramadhani'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('admin-page-back')));
+    await tester.pumpAndSettle();
+    expect(find.text('Ringkasan Kegiatan'), findsOneWidget);
 
     await tester.tap(find.text('Cetak Laporan'));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('report-year-filter')), findsOneWidget);
     expect(find.byKey(const Key('print-activity-report')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('admin-page-back')));
+    await tester.pumpAndSettle();
+    expect(find.text('Ringkasan Kegiatan'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -264,6 +273,9 @@ void main() {
     await tester.tap(find.text('Kelola Pengguna').last);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('admin-user-search')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('admin-page-back')));
+    await tester.pumpAndSettle();
+    expect(find.text('Pengaturan'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
