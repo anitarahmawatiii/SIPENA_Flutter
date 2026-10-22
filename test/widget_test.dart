@@ -219,6 +219,54 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('admin can open validation, user, and report tools', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await _signInAs(tester, 'Admin');
+
+    await tester.tap(find.text('Validasi Kegiatan'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Tinjau dan tentukan status kegiatan yang diajukan mahasiswa.'),
+      findsOneWidget,
+    );
+    expect(find.text('Menunggu'), findsWidgets);
+    await tester.tap(find.text('Setujui').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Disetujui'), findsWidgets);
+
+    await tester.tap(find.text('Kelola Pengguna'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('admin-user-search')), findsOneWidget);
+    expect(find.text('Alya Putri Ramadhani'), findsOneWidget);
+
+    await tester.tap(find.text('Cetak Laporan'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('report-year-filter')), findsOneWidget);
+    expect(find.byKey(const Key('print-activity-report')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('admin can navigate to the new tools from mobile settings', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await _signInAs(tester, 'Admin');
+
+    await _selectTab(tester, 'Pengaturan');
+    await tester.tap(find.text('Kelola Pengguna').last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('admin-user-search')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('student manages only personal activities across four tabs', (
     WidgetTester tester,
   ) async {
@@ -777,12 +825,14 @@ void main() {
       Brightness.dark,
     );
 
+    await tester.ensureVisible(find.byKey(const Key('settings-guide')));
     await tester.tap(find.byKey(const Key('settings-guide')));
     await tester.pumpAndSettle();
     expect(find.textContaining('Lihat kegiatan melalui'), findsOneWidget);
     await tester.tap(find.text('Tutup'));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.byKey(const Key('settings-help')));
     await tester.tap(find.byKey(const Key('settings-help')));
     await tester.pumpAndSettle();
     expect(

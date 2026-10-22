@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'activity_detail_page.dart';
 import 'activity_pages.dart';
+import 'admin_report_page.dart';
+import 'admin_validation_page.dart';
 import 'login_page.dart';
 import 'sipena_design.dart';
+import 'user_management_page.dart';
 
 void main() {
   runApp(const SipenaApp());
@@ -71,6 +74,7 @@ class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
   int _nextActivityId = 5;
   final List<ActivityEntry> _studentActivities = [];
+  final Map<int, ActivityValidationStatus> _activityValidationStatuses = {};
   final List<bool> _sampleNotificationRead = List<bool>.filled(4, false);
   _StudentProfileData _studentProfile = const _StudentProfileData();
   final List<ActivityEntry> _researchItems = [
@@ -397,7 +401,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               ),
                               onDelete: _deleteActivity,
                             ),
-                    _ =>
+                    3 =>
                       widget.role == SipenaRole.mahasiswa
                           ? _StudentProfilePage(
                               email: widget.email,
@@ -411,7 +415,20 @@ class _DashboardPageState extends State<DashboardPage> {
                           : _SettingsPage(
                               isDarkMode: widget.isDarkMode,
                               onDarkModeChanged: widget.onDarkModeChanged,
+                              onAdminNavigate: (index) =>
+                                  setState(() => _selectedIndex = index),
                             ),
+                    4 => AdminValidationPage(
+                      items: _allItems,
+                      statuses: _activityValidationStatuses,
+                      onStatusChanged: (item, status) => setState(
+                        () => _activityValidationStatuses[item.id] = status,
+                      ),
+                      onDetail: _openActivityDetail,
+                    ),
+                    5 => const UserManagementPage(),
+                    6 => AdminReportPage(items: _allItems),
+                    _ => const SizedBox.shrink(),
                   },
                 ),
               ),
@@ -438,7 +455,9 @@ class _DashboardPageState extends State<DashboardPage> {
       bottomNavigationBar: MediaQuery.sizeOf(context).width >= 900
           ? null
           : NavigationBar(
-              selectedIndex: _selectedIndex,
+              selectedIndex: _selectedIndex < destinations.length
+                  ? _selectedIndex
+                  : destinations.length - 1,
               onDestinationSelected: (index) {
                 setState(() => _selectedIndex = index);
               },
@@ -511,6 +530,21 @@ class _DesktopSidebar extends StatelessWidget {
             icon: Icon(Icons.settings_outlined),
             selectedIcon: Icon(Icons.settings_rounded),
             label: 'Pengaturan',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.fact_check_outlined),
+            selectedIcon: Icon(Icons.fact_check_rounded),
+            label: 'Validasi Kegiatan',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.groups_outlined),
+            selectedIcon: Icon(Icons.groups_rounded),
+            label: 'Kelola Pengguna',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.assessment_outlined),
+            selectedIcon: Icon(Icons.assessment_rounded),
+            label: 'Cetak Laporan',
           ),
         ];
 
@@ -649,12 +683,16 @@ class _DesktopNavigationItem extends StatelessWidget {
                       : destination.icon,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  destination.label,
-                  style: TextStyle(
-                    color: foreground,
-                    fontSize: 13,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    destination.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: foreground,
+                      fontSize: 13,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -1746,10 +1784,12 @@ class _SettingsPage extends StatelessWidget {
   const _SettingsPage({
     required this.isDarkMode,
     required this.onDarkModeChanged,
+    this.onAdminNavigate,
   });
 
   final bool isDarkMode;
   final ValueChanged<bool> onDarkModeChanged;
+  final ValueChanged<int>? onAdminNavigate;
 
   void _showGuide(BuildContext context) {
     showDialog<void>(
@@ -1856,6 +1896,50 @@ class _SettingsPage extends StatelessWidget {
                       fontSize: 13,
                     ),
                   ),
+                  if (onAdminNavigate != null) ...[
+                    const SizedBox(height: 26),
+                    const _SettingsSectionTitle('ADMINISTRASI'),
+                    const SizedBox(height: 10),
+                    Material(
+                      color: context.sipenaCardColor,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: context.sipenaBorderColor),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.fact_check_outlined),
+                            title: const Text('Validasi Kegiatan'),
+                            subtitle: const Text(
+                              'Tinjau dan verifikasi pengajuan kegiatan',
+                            ),
+                            trailing: const Icon(Icons.chevron_right_rounded),
+                            onTap: () => onAdminNavigate!(4),
+                          ),
+                          Divider(height: 1, color: context.sipenaBorderColor),
+                          ListTile(
+                            leading: const Icon(Icons.groups_outlined),
+                            title: const Text('Kelola Pengguna'),
+                            subtitle: const Text('Atur peran dan status akun'),
+                            trailing: const Icon(Icons.chevron_right_rounded),
+                            onTap: () => onAdminNavigate!(5),
+                          ),
+                          Divider(height: 1, color: context.sipenaBorderColor),
+                          ListTile(
+                            leading: const Icon(Icons.assessment_outlined),
+                            title: const Text('Cetak Laporan'),
+                            subtitle: const Text(
+                              'Pratinjau dan cetak rekap kegiatan',
+                            ),
+                            trailing: const Icon(Icons.chevron_right_rounded),
+                            onTap: () => onAdminNavigate!(6),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 28),
                   const _SettingsSectionTitle('TAMPILAN'),
                   const SizedBox(height: 10),
