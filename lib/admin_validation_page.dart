@@ -70,10 +70,10 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
           SipenaSurfaceCard(
             child: Row(
               children: [
-                const SipenaIconTile(
+                SipenaIconTile(
                   icon: Icons.fact_check_outlined,
-                  color: SipenaPalette.gold,
-                  background: SipenaPalette.paleGold,
+                  color: context.sipenaStatusWaitingColor,
+                  background: context.sipenaStatusWaitingTint,
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -165,8 +165,8 @@ class _ValidationActivityCard extends StatelessWidget {
             children: [
               SipenaIconTile(
                 icon: item.type.icon,
-                color: item.type.color,
-                background: item.type.tint,
+                color: context.activityColor(item.type),
+                background: context.activityTint(item.type),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -225,7 +225,7 @@ class _ValidationActivityCard extends StatelessWidget {
                   icon: const Icon(Icons.close_rounded, size: 18),
                   label: const Text('Tolak'),
                   style: TextButton.styleFrom(
-                    foregroundColor: SipenaPalette.red,
+                    foregroundColor: context.sipenaDangerColor,
                   ),
                 ),
             ],
@@ -339,7 +339,7 @@ class _AdminEmptyState extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         child: Column(
           children: [
-            Icon(icon, size: 34, color: SipenaPalette.muted),
+            Icon(icon, size: 34, color: context.sipenaMutedTextColor),
             const SizedBox(height: 10),
             Text(message, textAlign: TextAlign.center),
           ],

@@ -166,9 +166,11 @@ class ActivityDetailPage extends StatelessWidget {
                             icon: const Icon(Icons.edit_outlined),
                             label: const Text('Edit'),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: SipenaPalette.navy,
+                              foregroundColor: context.sipenaAccentColor,
                               minimumSize: const Size.fromHeight(50),
-                              side: const BorderSide(color: Color(0xFFB8CBE2)),
+                              side: BorderSide(
+                                color: context.sipenaInputBorderColor,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -190,8 +192,10 @@ class ActivityDetailPage extends StatelessWidget {
                             icon: const Icon(Icons.delete_outline_rounded),
                             label: const Text('Hapus'),
                             style: FilledButton.styleFrom(
-                              backgroundColor: SipenaPalette.red,
-                              foregroundColor: Colors.white,
+                              backgroundColor: context.sipenaDangerColor,
+                              foregroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .onError,
                               minimumSize: const Size.fromHeight(50),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
@@ -358,7 +362,7 @@ class _DetailSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: SipenaPalette.blue, size: 20),
+              Icon(icon, color: context.sipenaAccentColor, size: 20),
               const SizedBox(width: 9),
               Expanded(
                 child: Text(
@@ -434,13 +438,13 @@ class _InformationTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.isSipenaDark
             ? SipenaPalette.darkSection
-            : SipenaPalette.section,
+            : context.sipenaSectionColor,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(item.icon, color: const Color(0xFF55769C), size: 19),
+          Icon(item.icon, color: context.sipenaAccentColor, size: 19),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -534,7 +538,7 @@ class _DocumentAttachment extends StatelessWidget {
               document.fileType.toLowerCase() == 'pdf'
                   ? Icons.picture_as_pdf_outlined
                   : Icons.insert_drive_file_outlined,
-              color: SipenaPalette.blue,
+              color: context.sipenaAccentColor,
               size: 22,
             ),
           ),

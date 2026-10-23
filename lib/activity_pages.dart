@@ -3,38 +3,19 @@ import 'package:file_picker/file_picker.dart';
 
 import 'sipena_design.dart';
 
-extension SipenaThemeColors on BuildContext {
-  bool get isSipenaDark => Theme.of(this).brightness == Brightness.dark;
-
-  Color get sipenaCardColor =>
-      isSipenaDark ? const Color(0xFF1B2838) : Colors.white;
-
-  Color get sipenaInsetColor =>
-      isSipenaDark ? const Color(0xFF253447) : const Color(0xFFF7F9FC);
-
-  Color get sipenaBorderColor =>
-      isSipenaDark ? const Color(0xFF384B61) : SipenaPalette.line;
-
-  Color get sipenaInputBorderColor =>
-      isSipenaDark ? const Color(0xFF455970) : const Color(0xFFE1E7EF);
-
-  Color get sipenaHeadingColor =>
-      isSipenaDark ? const Color(0xFFEAF1F8) : SipenaPalette.ink;
-
-  Color get sipenaTextColor =>
-      isSipenaDark ? const Color(0xFFD5DFEA) : SipenaPalette.body;
-
-  Color get sipenaMutedTextColor =>
-      isSipenaDark ? const Color(0xFFA6B5C7) : SipenaPalette.muted;
-
-  Color get sipenaSubtleTextColor =>
-      isSipenaDark ? const Color(0xFF91A2B7) : const Color(0xFF8290A1);
-
-  Color get sipenaAccentSurfaceColor =>
-      isSipenaDark ? SipenaPalette.darkSection : SipenaPalette.paleBlue;
-}
-
 enum ActivityType { penelitian, pengabdian }
+
+extension SipenaActivityColors on BuildContext {
+  Color activityColor(ActivityType type) => switch (type) {
+    ActivityType.penelitian => sipenaActivityResearchColor,
+    ActivityType.pengabdian => sipenaActivityCommunityColor,
+  };
+
+  Color activityTint(ActivityType type) => switch (type) {
+    ActivityType.penelitian => sipenaActivityResearchTint,
+    ActivityType.pengabdian => sipenaActivityCommunityTint,
+  };
+}
 
 extension ActivityTypePresentation on ActivityType {
   String get label => switch (this) {
@@ -339,8 +320,8 @@ class _HomeActivitySearchState extends State<HomeActivitySearch> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(
-                color: SipenaPalette.blue,
+              borderSide: BorderSide(
+                color: context.sipenaAccentColor,
                 width: 1.5,
               ),
             ),
@@ -436,7 +417,9 @@ class _ActivityPageLayout extends StatelessWidget {
                           vertical: 7,
                         ),
                         decoration: BoxDecoration(
-                          color: SipenaPalette.navy,
+                          color: context.isSipenaDark
+                              ? const Color(0xFF29466B)
+                              : SipenaPalette.navy,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -493,8 +476,8 @@ class _ActivityCard extends StatelessWidget {
             children: [
               SipenaIconTile(
                 icon: item.type.icon,
-                color: item.type.color,
-                background: item.type.tint,
+                color: context.activityColor(item.type),
+                background: context.activityTint(item.type),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -517,13 +500,13 @@ class _ActivityCard extends StatelessWidget {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: item.type.tint,
+                            color: context.activityTint(item.type),
                             borderRadius: BorderRadius.circular(7),
                           ),
                           child: Text(
                             item.type.label,
                             style: TextStyle(
-                              color: item.type.color,
+                              color: context.activityColor(item.type),
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                             ),
@@ -602,7 +585,7 @@ class _ActivityCard extends StatelessWidget {
                   icon: const Icon(Icons.edit_outlined, size: 17),
                   label: const Text('Edit'),
                   style: TextButton.styleFrom(
-                    foregroundColor: SipenaPalette.navy,
+                    foregroundColor: context.sipenaAccentColor,
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
@@ -614,7 +597,7 @@ class _ActivityCard extends StatelessWidget {
                   icon: const Icon(Icons.delete_outline_rounded, size: 17),
                   label: const Text('Hapus'),
                   style: TextButton.styleFrom(
-                    foregroundColor: SipenaPalette.red,
+                    foregroundColor: context.sipenaDangerColor,
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
@@ -722,8 +705,8 @@ class _FormGroupHeading extends StatelessWidget {
         children: [
           SipenaIconTile(
             icon: icon,
-            color: SipenaPalette.navy,
-            background: SipenaPalette.paleBlue,
+            color: context.sipenaAccentColor,
+            background: context.sipenaAccentSurfaceColor,
             size: 38,
           ),
           const SizedBox(width: 11),
@@ -959,9 +942,9 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                   children: [
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.insert_drive_file_outlined,
-                          color: Color(0xFF1557A6),
+                          color: context.sipenaAccentColor,
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -1020,7 +1003,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                           icon: const Icon(Icons.delete_outline, size: 16),
                           label: const Text('Hapus'),
                           style: TextButton.styleFrom(
-                            foregroundColor: const Color(0xFFB23B3B),
+                            foregroundColor: context.sipenaDangerColor,
                             visualDensity: VisualDensity.compact,
                           ),
                         ),
@@ -1105,7 +1088,10 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(9),
-            borderSide: const BorderSide(color: SipenaPalette.blue, width: 1.5),
+            borderSide: BorderSide(
+              color: context.sipenaAccentColor,
+              width: 1.5,
+            ),
           ),
         ),
       ),
@@ -1142,7 +1128,10 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(9),
-            borderSide: const BorderSide(color: SipenaPalette.blue, width: 1.5),
+            borderSide: BorderSide(
+              color: context.sipenaAccentColor,
+              width: 1.5,
+            ),
           ),
         ),
       ),
@@ -1278,7 +1267,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                 icon: const Icon(Icons.save_outlined),
                 label: Text(_isEditing ? 'Simpan Perubahan' : 'Simpan Data'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: SipenaPalette.blue,
+                  backgroundColor: context.sipenaAccentColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

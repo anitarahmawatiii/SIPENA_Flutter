@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: SipenaPalette.canvas,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: _AuthPageFrame(
         child: Form(
           key: _formKey,
@@ -73,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.username],
                 decoration: _authInputDecoration(
+                  context,
                   hint: 'Masukkan email',
                   icon: Icons.mail_outline_rounded,
                 ),
@@ -90,6 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                 onFieldSubmitted: (_) => _submit(),
                 decoration:
                     _authInputDecoration(
+                      context,
                       hint: 'Masukkan password',
                       icon: Icons.lock_outline_rounded,
                     ).copyWith(
@@ -149,10 +151,13 @@ class _LoginPageState extends State<LoginPage> {
                 onTap: _openRegistration,
               ),
               const SizedBox(height: 12),
-              const Center(
+              Center(
                 child: Text(
                   'Login simulasi tanpa database atau API.',
-                  style: TextStyle(color: Color(0xFF8290A1), fontSize: 12),
+                  style: TextStyle(
+                    color: context.sipenaSubtleTextColor,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
@@ -197,7 +202,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: SipenaPalette.canvas,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: _AuthPageFrame(
           showBackButton: true,
@@ -220,6 +225,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.next,
                   decoration: _authInputDecoration(
+                    context,
                     hint: 'Masukkan nama lengkap',
                     icon: Icons.person_outline_rounded,
                   ),
@@ -236,6 +242,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   keyboardType: TextInputType.number,
                   textInputAction: TextInputAction.next,
                   decoration: _authInputDecoration(
+                    context,
                     hint: 'Masukkan NIM',
                     icon: Icons.badge_outlined,
                   ),
@@ -251,6 +258,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.next,
                   decoration: _authInputDecoration(
+                    context,
                     hint: 'Masukkan program studi',
                     icon: Icons.menu_book_outlined,
                   ),
@@ -267,6 +275,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   decoration: _authInputDecoration(
+                    context,
                     hint: 'Masukkan email',
                     icon: Icons.mail_outline_rounded,
                   ),
@@ -283,6 +292,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   onFieldSubmitted: (_) => _submit(),
                   decoration:
                       _authInputDecoration(
+                        context,
                         hint: 'Buat password',
                         icon: Icons.lock_outline_rounded,
                       ).copyWith(
@@ -345,8 +355,10 @@ class _AuthPageFrame extends StatelessWidget {
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Stack(
                 children: [
-                  const Positioned.fill(
-                    child: ColoredBox(color: SipenaPalette.canvas),
+                  Positioned.fill(
+                    child: ColoredBox(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                    ),
                   ),
                   if (isWide)
                     Positioned(
@@ -403,8 +415,10 @@ class _AuthPageFrame extends StatelessWidget {
                           width: double.infinity,
                           padding: EdgeInsets.all(isCompact ? 22 : 32),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: const Color(0xFFDCE6F2)),
+                            color: context.sipenaCardColor,
+                            border: Border.all(
+                              color: context.sipenaBorderColor,
+                            ),
                             borderRadius: BorderRadius.circular(14),
                             boxShadow: const [
                               BoxShadow(
@@ -473,25 +487,25 @@ class _BrandMark extends StatelessWidget {
               ),
             ],
           ),
-          child: const Icon(
+          child: Icon(
             Icons.account_balance_rounded,
-            color: SipenaPalette.white,
+            color: context.sipenaAccentColor,
             size: 28,
           ),
         ),
         const SizedBox(height: 9),
-        const Text(
+        Text(
           'SIPENA',
           style: TextStyle(
-            color: SipenaPalette.navy,
+            color: context.sipenaHeadingColor,
             fontSize: 17,
             fontWeight: FontWeight.w800,
           ),
         ),
         const SizedBox(height: 3),
-        const Text(
+        Text(
           'Academic Management System',
-          style: TextStyle(color: Color(0xFF718096), fontSize: 12),
+          style: TextStyle(color: context.sipenaMutedTextColor, fontSize: 12),
         ),
       ],
     );
@@ -561,8 +575,8 @@ class _AuthHeading extends StatelessWidget {
         Text(
           title,
           textAlign: centered ? TextAlign.center : TextAlign.start,
-          style: const TextStyle(
-            color: SipenaPalette.ink,
+          style: TextStyle(
+            color: context.sipenaHeadingColor,
             fontSize: 25,
             fontWeight: FontWeight.w700,
           ),
@@ -572,8 +586,8 @@ class _AuthHeading extends StatelessWidget {
           Text(
             subtitle!,
             textAlign: centered ? TextAlign.center : TextAlign.start,
-            style: const TextStyle(
-              color: SipenaPalette.muted,
+            style: TextStyle(
+              color: context.sipenaMutedTextColor,
               fontSize: 13,
               height: 1.4,
             ),
@@ -593,8 +607,8 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: const TextStyle(
-        color: SipenaPalette.body,
+      style: TextStyle(
+        color: context.sipenaTextColor,
         fontSize: 13,
         fontWeight: FontWeight.w600,
       ),
@@ -619,13 +633,13 @@ class _PrimaryAuthButton extends StatelessWidget {
       child: FilledButton(
         onPressed: onPressed,
         style: FilledButton.styleFrom(
-          backgroundColor: SipenaPalette.blue,
-          foregroundColor: Colors.white,
+          backgroundColor: context.sipenaAccentColor,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
         ),
         child: Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
         ),
       ),
     );
@@ -652,12 +666,12 @@ class _AuthNavigationText extends StatelessWidget {
         children: [
           Text(
             lead,
-            style: TextStyle(color: SipenaPalette.muted, fontSize: 13),
+            style: TextStyle(color: context.sipenaMutedTextColor, fontSize: 13),
           ),
           TextButton(
             onPressed: onTap,
             style: TextButton.styleFrom(
-              foregroundColor: SipenaPalette.blue,
+              foregroundColor: context.sipenaAccentColor,
               padding: const EdgeInsets.symmetric(horizontal: 5),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -673,27 +687,28 @@ class _AuthNavigationText extends StatelessWidget {
   }
 }
 
-InputDecoration _authInputDecoration({
+InputDecoration _authInputDecoration(
+  BuildContext context, {
   required String hint,
   required IconData icon,
 }) {
   return InputDecoration(
     hintText: hint,
-    prefixIcon: Icon(icon, size: 19, color: const Color(0xFF8B98A8)),
+    prefixIcon: Icon(icon, size: 19, color: context.sipenaMutedTextColor),
     filled: true,
-    fillColor: SipenaPalette.softBlue,
+    fillColor: context.sipenaInsetColor,
     contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 14),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: SipenaPalette.line),
+      borderSide: BorderSide(color: context.sipenaInputBorderColor),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: SipenaPalette.line),
+      borderSide: BorderSide(color: context.sipenaInputBorderColor),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: SipenaPalette.blue, width: 1.5),
+      borderSide: BorderSide(color: context.sipenaAccentColor, width: 1.5),
     ),
   );
 }

@@ -159,10 +159,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
                   SipenaSurfaceCard(
                     child: Row(
                       children: [
-                        const SipenaIconTile(
+                        SipenaIconTile(
                           icon: Icons.groups_outlined,
-                          color: SipenaPalette.blue,
-                          background: SipenaPalette.paleBlue,
+                          color: context.sipenaAccentColor,
+                          background: context.sipenaAccentSurfaceColor,
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -265,8 +265,8 @@ class _UserCard extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
-                backgroundColor: SipenaPalette.paleBlue,
-                foregroundColor: SipenaPalette.navy,
+                backgroundColor: context.sipenaAccentSurfaceColor,
+                foregroundColor: context.sipenaAccentColor,
                 child: Text(user.name.substring(0, 1).toUpperCase()),
               ),
               const SizedBox(width: 12),
@@ -295,16 +295,16 @@ class _UserCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                 decoration: BoxDecoration(
                   color: user.isActive
-                      ? SipenaPalette.paleTeal
-                      : SipenaPalette.paleRed,
+                      ? context.sipenaStatusSuccessTint
+                      : context.sipenaStatusRejectedTint,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   user.isActive ? 'Aktif' : 'Nonaktif',
                   style: TextStyle(
                     color: user.isActive
-                        ? SipenaPalette.teal
-                        : SipenaPalette.red,
+                        ? context.sipenaStatusSuccessColor
+                        : context.sipenaStatusRejectedColor,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),

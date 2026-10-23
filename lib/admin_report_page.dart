@@ -270,8 +270,8 @@ class _AdminReportPageState extends State<AdminReportPage> {
                             child: _ReportCountCard(
                               label: 'Total kegiatan',
                               value: items.length,
-                              color: SipenaPalette.navy,
-                              tint: SipenaPalette.paleBlue,
+                              color: context.sipenaAccentColor,
+                              tint: context.sipenaAccentSurfaceColor,
                               icon: Icons.assessment_outlined,
                             ),
                           ),
@@ -280,8 +280,8 @@ class _AdminReportPageState extends State<AdminReportPage> {
                             child: _ReportCountCard(
                               label: 'Penelitian',
                               value: researchCount,
-                              color: SipenaPalette.blue,
-                              tint: SipenaPalette.paleBlue,
+                              color: context.sipenaActivityResearchColor,
+                              tint: context.sipenaActivityResearchTint,
                               icon: Icons.science_outlined,
                             ),
                           ),
@@ -290,8 +290,8 @@ class _AdminReportPageState extends State<AdminReportPage> {
                             child: _ReportCountCard(
                               label: 'Pengabdian',
                               value: communityCount,
-                              color: SipenaPalette.teal,
-                              tint: SipenaPalette.paleTeal,
+                              color: context.sipenaActivityCommunityColor,
+                              tint: context.sipenaActivityCommunityTint,
                               icon: Icons.volunteer_activism_outlined,
                             ),
                           ),
@@ -348,8 +348,12 @@ class _AdminReportPageState extends State<AdminReportPage> {
                           for (final item in items)
                             ListTile(
                               leading: CircleAvatar(
-                                backgroundColor: item.type.tint,
-                                foregroundColor: item.type.color,
+                                backgroundColor: context.activityTint(
+                                  item.type,
+                                ),
+                                foregroundColor: context.activityColor(
+                                  item.type,
+                                ),
                                 child: Icon(item.type.icon),
                               ),
                               title: Text(item.title),
@@ -394,7 +398,14 @@ class _ReportCountCard extends StatelessWidget {
     padding: const EdgeInsets.all(16),
     child: Row(
       children: [
-        SipenaIconTile(icon: icon, color: color, background: tint, size: 40),
+        SipenaIconTile(
+          icon: icon,
+          color: context.isSipenaDark
+              ? Color.lerp(color, Colors.white, 0.42)!
+              : color,
+          background: context.isSipenaDark ? SipenaPalette.darkSection : tint,
+          size: 40,
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(

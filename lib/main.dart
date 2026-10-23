@@ -572,7 +572,9 @@ class _DesktopSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 232,
-      color: SipenaPalette.navy,
+      color: context.isSipenaDark
+          ? const Color(0xFF152B46)
+          : SipenaPalette.navy,
       padding: const EdgeInsets.fromLTRB(18, 28, 18, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -586,7 +588,7 @@ class _DesktopSidebar extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.account_balance_rounded,
                   color: SipenaPalette.navy,
                   size: 23,
@@ -881,15 +883,15 @@ class _StudentQuickActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SipenaSurfaceCard(
-      color: SipenaPalette.section,
+      color: context.sipenaSectionColor,
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SipenaIconTile(
+          SipenaIconTile(
             icon: Icons.bolt_rounded,
-            color: SipenaPalette.navy,
-            background: SipenaPalette.white,
+            color: context.sipenaAccentColor,
+            background: context.sipenaCardColor,
             size: 42,
           ),
           const SizedBox(height: 16),
@@ -937,7 +939,7 @@ class _RecentStudentActivities extends StatelessWidget {
       ..sort((a, b) => b.activityDate.compareTo(a.activityDate));
     if (recent.isEmpty) {
       return SipenaSurfaceCard(
-        color: SipenaPalette.section,
+        color: context.sipenaSectionColor,
         padding: const EdgeInsets.all(20),
         child: Text(
           'Belum ada aktivitas. Mulai dengan menambahkan kegiatan Anda.',
@@ -957,8 +959,11 @@ class _RecentStudentActivities extends StatelessWidget {
           ),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: activity.type.tint,
-              child: Icon(activity.type.icon, color: activity.type.color),
+              backgroundColor: context.activityTint(activity.type),
+              child: Icon(
+                activity.type.icon,
+                color: context.activityColor(activity.type),
+              ),
             ),
             title: Text(
               activity.title,
@@ -1112,10 +1117,17 @@ class _NotificationExampleCard extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: example.tint,
+              color: context.isSipenaDark
+                  ? SipenaPalette.darkSection
+                  : example.tint,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(example.icon, color: example.color),
+            child: Icon(
+              example.icon,
+              color: context.isSipenaDark
+                  ? Color.lerp(example.color, Colors.white, 0.38)
+                  : example.color,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1151,7 +1163,9 @@ class _NotificationExampleCard extends StatelessWidget {
             child: Text(
               'Contoh',
               style: TextStyle(
-                color: example.color,
+                color: context.isSipenaDark
+                    ? Color.lerp(example.color, Colors.white, 0.38)
+                    : example.color,
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
               ),
@@ -1219,10 +1233,13 @@ class _StudentAddPage extends StatelessWidget {
                             width: 44,
                             height: 44,
                             decoration: BoxDecoration(
-                              color: type.tint,
+                              color: context.activityTint(type),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Icon(type.icon, color: type.color),
+                            child: Icon(
+                              type.icon,
+                              color: context.activityColor(type),
+                            ),
                           ),
                           title: Text(
                             type.label,
@@ -1384,12 +1401,14 @@ class _StudentProfilePageState extends State<_StudentProfilePage> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
+                      gradient: LinearGradient(
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                         colors: [
-                          SipenaPalette.paleBlue,
-                          SipenaPalette.paleTeal,
+                          context.sipenaAccentSurfaceColor,
+                          context.isSipenaDark
+                              ? const Color(0xFF1E403F)
+                              : SipenaPalette.paleTeal,
                         ],
                       ),
                       borderRadius: BorderRadius.circular(10),
@@ -1400,12 +1419,12 @@ class _StudentProfilePageState extends State<_StudentProfilePage> {
                           width: 52,
                           height: 52,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: context.sipenaCardColor,
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.person_rounded,
-                            color: SipenaPalette.navy,
+                            color: context.sipenaAccentColor,
                             size: 27,
                           ),
                         ),
@@ -1527,8 +1546,8 @@ class _StudentProfilePageState extends State<_StudentProfilePage> {
                       icon: const Icon(Icons.logout_rounded),
                       label: const Text('Keluar'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFFB23B3B),
-                        side: const BorderSide(color: Color(0xFFE5BABA)),
+                        foregroundColor: context.sipenaDangerColor,
+                        side: BorderSide(color: context.sipenaDangerColor),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(9),
                         ),
@@ -1791,7 +1810,7 @@ class _ProfileAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: const Color(0xFF1557A6)),
+      leading: Icon(icon, color: context.sipenaAccentColor),
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: const Icon(Icons.chevron_right_rounded),
@@ -2037,9 +2056,9 @@ class _SettingsPage extends StatelessWidget {
                             color: context.sipenaAccentSurfaceColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.account_balance_outlined,
-                            color: Color(0xFF1557A6),
+                            color: context.sipenaAccentColor,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -2129,7 +2148,7 @@ class _Header extends StatelessWidget {
           width: 46,
           height: 46,
           decoration: BoxDecoration(
-            color: const Color(0xFF1557A6),
+            color: context.sipenaAccentColor,
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(
@@ -2170,9 +2189,9 @@ class _Header extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.calendar_month_outlined,
-                  color: Color(0xFF1557A6),
+                  color: context.sipenaAccentColor,
                   size: 17,
                 ),
                 const SizedBox(width: 8),
@@ -2214,7 +2233,7 @@ class _Header extends StatelessWidget {
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFC33D4D),
+                          color: context.sipenaDangerColor,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: Theme.of(context).scaffoldBackgroundColor,
@@ -2244,7 +2263,7 @@ class _Header extends StatelessWidget {
           tooltip: 'Keluar dari akun',
           onPressed: onLogout,
           icon: const Icon(Icons.logout_rounded),
-          color: const Color(0xFF718096),
+          color: context.sipenaMutedTextColor,
         ),
       ],
     );
@@ -2418,6 +2437,9 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accentColor = context.isSipenaDark
+        ? Color.lerp(data.color, Colors.white, 0.42)!
+        : data.color;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -2436,16 +2458,16 @@ class _StatCard extends StatelessWidget {
             children: [
               SipenaIconTile(
                 icon: data.icon,
-                color: data.color,
+                color: accentColor,
                 background: context.isSipenaDark
-                    ? data.color.withValues(alpha: 0.18)
+                    ? accentColor.withValues(alpha: 0.16)
                     : Colors.white.withValues(alpha: 0.84),
                 size: 42,
               ),
               const Spacer(),
               Icon(
                 Icons.north_east_rounded,
-                color: data.color.withValues(alpha: 0.65),
+                color: accentColor.withValues(alpha: 0.85),
                 size: 18,
               ),
             ],
