@@ -5,6 +5,7 @@ import 'package:sipena/activity_pages.dart';
 import 'package:sipena/activity_detail_page.dart';
 import 'package:sipena/login_page.dart';
 import 'package:sipena/main.dart';
+import 'package:sipena/sipena_design.dart';
 
 class _ActivityFormLauncher extends StatefulWidget {
   const _ActivityFormLauncher({required this.initial, this.pickDocument});
@@ -88,6 +89,15 @@ Future<void> _signInAs(WidgetTester tester, String role) async {
 }
 
 void main() {
+  test('light and dark themes use Quicksand', () {
+    expect(SipenaTheme.light.textTheme.bodyMedium?.fontFamily, 'Quicksand');
+    expect(SipenaTheme.dark.textTheme.bodyMedium?.fontFamily, 'Quicksand');
+    expect(
+      SipenaTheme.light.appBarTheme.titleTextStyle?.fontFamily,
+      'Quicksand',
+    );
+  });
+
   testWidgets('login validates credentials and opens selected dashboard', (
     WidgetTester tester,
   ) async {

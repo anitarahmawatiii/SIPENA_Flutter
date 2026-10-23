@@ -140,6 +140,7 @@ abstract final class SipenaTheme {
       dividerColor: SipenaPalette.line,
       useMaterial3: true,
       visualDensity: VisualDensity.standard,
+      fontFamily: 'Quicksand',
       textTheme: _textTheme(SipenaPalette.ink, SipenaPalette.body),
       appBarTheme: const AppBarTheme(
         backgroundColor: SipenaPalette.canvas,
@@ -148,6 +149,7 @@ abstract final class SipenaTheme {
         elevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
+          fontFamily: 'Quicksand',
           color: SipenaPalette.navy,
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -249,6 +251,7 @@ abstract final class SipenaTheme {
       dividerColor: SipenaPalette.darkBorder,
       useMaterial3: true,
       visualDensity: VisualDensity.standard,
+      fontFamily: 'Quicksand',
       textTheme: _textTheme(const Color(0xFFEAF1F8), const Color(0xFFD5DFEA))
           .apply(
             bodyColor: const Color(0xFFD5DFEA),
@@ -350,36 +353,56 @@ abstract final class SipenaTheme {
 
   static TextTheme _textTheme(Color heading, Color body) => TextTheme(
     headlineLarge: TextStyle(
+      fontFamily: 'Quicksand',
       color: heading,
       fontSize: 32,
       fontWeight: FontWeight.w800,
       height: 1.12,
     ),
     headlineMedium: TextStyle(
+      fontFamily: 'Quicksand',
       color: heading,
       fontSize: 27,
       fontWeight: FontWeight.w800,
       height: 1.18,
     ),
     headlineSmall: TextStyle(
+      fontFamily: 'Quicksand',
       color: heading,
       fontSize: 22,
       fontWeight: FontWeight.w800,
       height: 1.2,
     ),
     titleLarge: TextStyle(
+      fontFamily: 'Quicksand',
       color: heading,
       fontSize: 18,
       fontWeight: FontWeight.w700,
     ),
     titleMedium: TextStyle(
+      fontFamily: 'Quicksand',
       color: heading,
       fontSize: 15,
       fontWeight: FontWeight.w700,
     ),
-    bodyLarge: TextStyle(color: body, fontSize: 15, height: 1.5),
-    bodyMedium: TextStyle(color: body, fontSize: 14, height: 1.45),
-    bodySmall: TextStyle(color: body, fontSize: 12, height: 1.4),
+    bodyLarge: TextStyle(
+      fontFamily: 'Quicksand',
+      color: body,
+      fontSize: 15,
+      height: 1.5,
+    ),
+    bodyMedium: TextStyle(
+      fontFamily: 'Quicksand',
+      color: body,
+      fontSize: 14,
+      height: 1.45,
+    ),
+    bodySmall: TextStyle(
+      fontFamily: 'Quicksand',
+      color: body,
+      fontSize: 12,
+      height: 1.4,
+    ),
   );
 
   static InputDecorationTheme _inputTheme({
