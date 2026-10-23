@@ -113,134 +113,129 @@ class _UserManagementPageState extends State<UserManagementPage> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final padding = constraints.maxWidth < 620 ? 20.0 : 36.0;
-        final contentWidth = (constraints.maxWidth - padding * 2)
-            .clamp(0.0, 1160.0)
-            .toDouble();
+        final isCompact = constraints.maxWidth < 620;
+        final padding = isCompact ? 20.0 : 24.0;
+        final contentWidth = constraints.maxWidth - padding * 2;
         return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: padding, vertical: 28),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: isCompact ? 20 : 24,
+          ),
           child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1160),
-              child: SizedBox(
-                width: contentWidth,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        IconButton(
-                          key: const Key('admin-page-back'),
-                          tooltip: 'Kembali',
-                          onPressed: widget.onBack,
-                          icon: const Icon(Icons.arrow_back_rounded),
+            child: SizedBox(
+              width: contentWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        key: const Key('admin-page-back'),
+                        tooltip: 'Kembali',
+                        onPressed: widget.onBack,
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Kelola Pengguna',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              'Cari akun, atur peran, dan aktifkan atau nonaktifkan akses.',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 4),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  SipenaSurfaceCard(
+                    child: Row(
+                      children: [
+                        const SipenaIconTile(
+                          icon: Icons.groups_outlined,
+                          color: SipenaPalette.blue,
+                          background: SipenaPalette.paleBlue,
+                        ),
+                        const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Kelola Pengguna',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall,
+                                '${_users.length} akun terdaftar',
+                                style: Theme.of(context).textTheme.titleMedium,
                               ),
-                              const SizedBox(height: 5),
                               Text(
-                                'Cari akun, atur peran, dan aktifkan atau nonaktifkan akses.',
-                                style: Theme.of(context).textTheme.bodyMedium,
+                                '$activeCount akun aktif',
+                                style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 22),
-                    SipenaSurfaceCard(
-                      child: Row(
-                        children: [
-                          const SipenaIconTile(
-                            icon: Icons.groups_outlined,
-                            color: SipenaPalette.blue,
-                            background: SipenaPalette.paleBlue,
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${_users.length} akun terdaftar',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium,
-                                ),
-                                Text(
-                                  '$activeCount akun aktif',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    key: const Key('admin-user-search'),
+                    controller: _searchController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search_rounded),
+                      hintText: 'Cari nama, NIM, email, atau program studi',
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      key: const Key('admin-user-search'),
-                      controller: _searchController,
-                      onChanged: (_) => setState(() {}),
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.search_rounded),
-                        hintText: 'Cari nama, NIM, email, atau program studi',
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Semua peran'),
+                        selected: _roleFilter == null,
+                        onSelected: (_) => setState(() => _roleFilter = null),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      children: [
+                      for (final role in ManagedUserRole.values)
                         ChoiceChip(
-                          label: const Text('Semua peran'),
-                          selected: _roleFilter == null,
-                          onSelected: (_) => setState(() => _roleFilter = null),
+                          label: Text(role.label),
+                          selected: _roleFilter == role,
+                          onSelected: (_) => setState(() {
+                            _roleFilter = _roleFilter == role ? null : role;
+                          }),
                         ),
-                        for (final role in ManagedUserRole.values)
-                          ChoiceChip(
-                            label: Text(role.label),
-                            selected: _roleFilter == role,
-                            onSelected: (_) => setState(() {
-                              _roleFilter = _roleFilter == role ? null : role;
-                            }),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  if (visibleUsers.isEmpty)
+                    const SipenaSurfaceCard(
+                      child: Center(child: Text('Pengguna tidak ditemukan.')),
+                    )
+                  else
+                    ...visibleUsers.map((user) {
+                      final index = _users.indexOf(user);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _UserCard(
+                          user: user,
+                          onRoleChanged: (role) => setState(
+                            () => _users[index] = user.copyWith(role: role),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    if (visibleUsers.isEmpty)
-                      const SipenaSurfaceCard(
-                        child: Center(child: Text('Pengguna tidak ditemukan.')),
-                      )
-                    else
-                      ...visibleUsers.map((user) {
-                        final index = _users.indexOf(user);
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: _UserCard(
-                            user: user,
-                            onRoleChanged: (role) => setState(
-                              () => _users[index] = user.copyWith(role: role),
-                            ),
-                            onActiveChanged: (isActive) => setState(
-                              () => _users[index] = user.copyWith(
-                                isActive: isActive,
-                              ),
+                          onActiveChanged: (isActive) => setState(
+                            () => _users[index] = user.copyWith(
+                              isActive: isActive,
                             ),
                           ),
-                        );
-                      }),
-                  ],
-                ),
+                        ),
+                      );
+                    }),
+                ],
               ),
             ),
           ),

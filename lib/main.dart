@@ -567,7 +567,7 @@ class _DesktopSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 248,
+      width: 232,
       color: SipenaPalette.navy,
       padding: const EdgeInsets.fromLTRB(18, 28, 18, 20),
       child: Column(
@@ -612,7 +612,7 @@ class _DesktopSidebar extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 42),
+          const SizedBox(height: 28),
           const Padding(
             padding: EdgeInsets.only(left: 12, bottom: 12),
             child: Text(
@@ -750,10 +750,8 @@ class _DashboardHome extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 620;
-        final horizontalPadding = isCompact ? 20.0 : 36.0;
-        final contentWidth = constraints.maxWidth > 1232
-            ? 1160.0
-            : constraints.maxWidth - horizontalPadding * 2;
+        final horizontalPadding = isCompact ? SipenaSpacing.pageMobile : 24.0;
+        final contentWidth = constraints.maxWidth - horizontalPadding * 2;
         final statColumns = contentWidth > 880
             ? 3
             : contentWidth > 520
@@ -763,7 +761,7 @@ class _DashboardHome extends StatelessWidget {
         return SingleChildScrollView(
           padding: EdgeInsets.symmetric(
             horizontal: horizontalPadding,
-            vertical: isCompact ? 20 : 32,
+            vertical: isCompact ? 20 : 28,
           ),
           child: Center(
             child: SizedBox(
@@ -778,14 +776,14 @@ class _DashboardHome extends StatelessWidget {
                     onNotifications: onNotifications,
                     unreadNotificationCount: unreadNotificationCount,
                   ),
-                  SizedBox(height: isCompact ? 28 : 40),
+                  SizedBox(height: isCompact ? 24 : 32),
                   _WelcomePanel(
                     isCompact: isCompact,
                     role: role,
                     email: email,
                     studentName: studentName,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 28),
                   _SectionHeading(
                     title: 'Ringkasan Kegiatan',
                     subtitle: role == SipenaRole.mahasiswa
@@ -800,7 +798,7 @@ class _DashboardHome extends StatelessWidget {
                         .map((stat) => _StatCard(data: stat))
                         .toList(),
                   ),
-                  const SizedBox(height: 34),
+                  const SizedBox(height: 28),
                   if (role == SipenaRole.admin)
                     HomeActivitySearch(items: activities, onDetail: onDetail),
                   if (role == SipenaRole.mahasiswa)
@@ -1016,13 +1014,14 @@ class StudentNotificationsPage extends StatelessWidget {
       appBar: AppBar(title: const Text('Notifikasi')),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final padding = constraints.maxWidth < 620 ? 20.0 : 36.0;
-          final contentWidth = (constraints.maxWidth - padding * 2).clamp(
-            0.0,
-            820.0,
-          );
+          final isCompact = constraints.maxWidth < 620;
+          final padding = isCompact ? 20.0 : 24.0;
+          final contentWidth = constraints.maxWidth - padding * 2;
           return SingleChildScrollView(
-            padding: EdgeInsets.all(padding),
+            padding: EdgeInsets.symmetric(
+              horizontal: padding,
+              vertical: isCompact ? 20 : 24,
+            ),
             child: Center(
               child: SizedBox(
                 width: contentWidth,
@@ -1169,13 +1168,14 @@ class _StudentAddPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final padding = constraints.maxWidth < 620 ? 20.0 : 36.0;
-        final contentWidth = (constraints.maxWidth - padding * 2).clamp(
-          0.0,
-          760.0,
-        );
+        final isCompact = constraints.maxWidth < 620;
+        final padding = isCompact ? 20.0 : 24.0;
+        final contentWidth = constraints.maxWidth - padding * 2;
         return SingleChildScrollView(
-          padding: EdgeInsets.all(padding),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: isCompact ? 20 : 24,
+          ),
           child: Center(
             child: SizedBox(
               width: contentWidth,
@@ -1351,12 +1351,12 @@ class _StudentProfilePageState extends State<_StudentProfilePage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final padding = constraints.maxWidth < 620 ? 20.0 : 36.0;
-        final contentWidth = (constraints.maxWidth - padding * 2).clamp(
-          0.0,
-          760.0,
-        );
+        final contentWidth = constraints.maxWidth - padding * 2;
         return SingleChildScrollView(
-          padding: EdgeInsets.all(padding),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: constraints.maxWidth < 620 ? 20 : 28,
+          ),
           child: Center(
             child: SizedBox(
               width: contentWidth,
@@ -1882,14 +1882,13 @@ class _SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final horizontalPadding = constraints.maxWidth < 620 ? 20.0 : 36.0;
-        final contentWidth = constraints.maxWidth > 1232
-            ? 760.0
-            : constraints.maxWidth - horizontalPadding * 2;
+        final isCompact = constraints.maxWidth < 620;
+        final horizontalPadding = isCompact ? 20.0 : 24.0;
+        final contentWidth = constraints.maxWidth - horizontalPadding * 2;
         return SingleChildScrollView(
           padding: EdgeInsets.symmetric(
             horizontal: horizontalPadding,
-            vertical: constraints.maxWidth < 620 ? 24 : 32,
+            vertical: isCompact ? 20 : 24,
           ),
           child: Center(
             child: SizedBox(

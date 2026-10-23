@@ -272,54 +272,51 @@ class _AdminPageBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final padding = constraints.maxWidth < 620 ? 20.0 : 36.0;
-        final contentWidth = (constraints.maxWidth - padding * 2)
-            .clamp(0.0, 1160.0)
-            .toDouble();
+        final isCompact = constraints.maxWidth < 620;
+        final padding = isCompact ? 20.0 : 24.0;
+        final contentWidth = constraints.maxWidth - padding * 2;
         return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: padding, vertical: 28),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: isCompact ? 20 : 24,
+          ),
           child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1160),
-              child: SizedBox(
-                width: contentWidth,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        IconButton(
-                          key: const Key('admin-page-back'),
-                          tooltip: 'Kembali',
-                          onPressed: onBack,
-                          icon: const Icon(Icons.arrow_back_rounded),
+            child: SizedBox(
+              width: contentWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        key: const Key('admin-page-back'),
+                        tooltip: 'Kembali',
+                        onPressed: onBack,
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              subtitle,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall,
-                              ),
-                              const SizedBox(height: 5),
-                              Text(
-                                subtitle,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 22),
-                    child,
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  child,
+                ],
               ),
             ),
           ),

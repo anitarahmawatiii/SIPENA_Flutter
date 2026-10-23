@@ -38,10 +38,8 @@ class ActivityDetailPage extends StatelessWidget {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final horizontalPadding = constraints.maxWidth < 620 ? 16.0 : 32.0;
-            final contentWidth = constraints.maxWidth > 1180
-                ? 900.0
-                : constraints.maxWidth - horizontalPadding * 2;
+            final horizontalPadding = constraints.maxWidth < 620 ? 16.0 : 24.0;
+            final contentWidth = constraints.maxWidth - horizontalPadding * 2;
             return SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(
                 horizontalPadding,
@@ -154,7 +152,7 @@ class ActivityDetailPage extends StatelessWidget {
                 alignment: Alignment.center,
                 heightFactor: 1,
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 840),
+                  constraints: const BoxConstraints(maxWidth: 1200),
                   child: Row(
                     children: [
                       if (onEdit != null)

@@ -144,215 +144,227 @@ class _AdminReportPageState extends State<AdminReportPage> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final padding = constraints.maxWidth < 620 ? 20.0 : 36.0;
-        final contentWidth = (constraints.maxWidth - padding * 2)
-            .clamp(0.0, 1160.0)
-            .toDouble();
+        final isCompact = constraints.maxWidth < 620;
+        final padding = isCompact ? 20.0 : 24.0;
+        final contentWidth = constraints.maxWidth - padding * 2;
         return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: padding, vertical: 28),
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+            vertical: isCompact ? 20 : 24,
+          ),
           child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1160),
-              child: SizedBox(
-                width: contentWidth,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        IconButton(
-                          key: const Key('admin-page-back'),
-                          tooltip: 'Kembali',
-                          onPressed: widget.onBack,
-                          icon: const Icon(Icons.arrow_back_rounded),
+            child: SizedBox(
+              width: contentWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        key: const Key('admin-page-back'),
+                        tooltip: 'Kembali',
+                        onPressed: widget.onBack,
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Cetak Laporan',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              'Pilih cakupan laporan dan cetak atau simpan sebagai PDF.',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Cetak Laporan',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  SipenaSurfaceCard(
+                    child: LayoutBuilder(
+                      builder: (context, cardConstraints) {
+                        final compact = cardConstraints.maxWidth < 600;
+                        final filters = [
+                          DropdownButtonFormField<String?>(
+                            key: const Key('report-year-filter'),
+                            initialValue: _selectedYear,
+                            decoration: const InputDecoration(
+                              labelText: 'Tahun',
+                              prefixIcon: Icon(Icons.calendar_today_outlined),
+                            ),
+                            items: [
+                              const DropdownMenuItem<String?>(
+                                value: null,
+                                child: Text('Semua tahun'),
                               ),
-                              const SizedBox(height: 5),
-                              Text(
-                                'Pilih cakupan laporan dan cetak atau simpan sebagai PDF.',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
+                              for (final year in _years)
+                                DropdownMenuItem<String?>(
+                                  value: year,
+                                  child: Text(year),
+                                ),
                             ],
+                            onChanged: (year) =>
+                                setState(() => _selectedYear = year),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 22),
-                    SipenaSurfaceCard(
-                      child: LayoutBuilder(
-                        builder: (context, cardConstraints) {
-                          final compact = cardConstraints.maxWidth < 600;
-                          final filters = [
-                            DropdownButtonFormField<String?>(
-                              key: const Key('report-year-filter'),
-                              initialValue: _selectedYear,
-                              decoration: const InputDecoration(
-                                labelText: 'Tahun',
-                                prefixIcon: Icon(Icons.calendar_today_outlined),
-                              ),
-                              items: [
-                                const DropdownMenuItem<String?>(
-                                  value: null,
-                                  child: Text('Semua tahun'),
-                                ),
-                                for (final year in _years)
-                                  DropdownMenuItem<String?>(
-                                    value: year,
-                                    child: Text(year),
-                                  ),
-                              ],
-                              onChanged: (year) =>
-                                  setState(() => _selectedYear = year),
+                          DropdownButtonFormField<ActivityType?>(
+                            key: const Key('report-type-filter'),
+                            initialValue: _selectedType,
+                            decoration: const InputDecoration(
+                              labelText: 'Jenis kegiatan',
+                              prefixIcon: Icon(Icons.category_outlined),
                             ),
-                            DropdownButtonFormField<ActivityType?>(
-                              key: const Key('report-type-filter'),
-                              initialValue: _selectedType,
-                              decoration: const InputDecoration(
-                                labelText: 'Jenis kegiatan',
-                                prefixIcon: Icon(Icons.category_outlined),
+                            items: [
+                              const DropdownMenuItem<ActivityType?>(
+                                value: null,
+                                child: Text('Semua jenis'),
                               ),
-                              items: [
-                                const DropdownMenuItem<ActivityType?>(
-                                  value: null,
-                                  child: Text('Semua jenis'),
+                              for (final type in ActivityType.values)
+                                DropdownMenuItem<ActivityType?>(
+                                  value: type,
+                                  child: Text(type.label),
                                 ),
-                                for (final type in ActivityType.values)
-                                  DropdownMenuItem<ActivityType?>(
-                                    value: type,
-                                    child: Text(type.label),
-                                  ),
-                              ],
-                              onChanged: (type) =>
-                                  setState(() => _selectedType = type),
-                            ),
-                          ];
-                          if (compact) {
-                            return Column(
-                              children: [
-                                filters[0],
-                                const SizedBox(height: 12),
-                                filters[1],
-                              ],
-                            );
-                          }
-                          return Row(
+                            ],
+                            onChanged: (type) =>
+                                setState(() => _selectedType = type),
+                          ),
+                        ];
+                        if (compact) {
+                          return Column(
                             children: [
-                              Expanded(child: filters[0]),
-                              const SizedBox(width: 14),
-                              Expanded(child: filters[1]),
+                              filters[0],
+                              const SizedBox(height: 12),
+                              filters[1],
                             ],
                           );
-                        },
-                      ),
+                        }
+                        return Row(
+                          children: [
+                            Expanded(child: filters[0]),
+                            const SizedBox(width: 14),
+                            Expanded(child: filters[1]),
+                          ],
+                        );
+                      },
                     ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: [
-                        _ReportCountCard(
-                          label: 'Total kegiatan',
-                          value: items.length,
-                          color: SipenaPalette.navy,
-                          tint: SipenaPalette.paleBlue,
-                          icon: Icons.assessment_outlined,
-                        ),
-                        _ReportCountCard(
-                          label: 'Penelitian',
-                          value: researchCount,
-                          color: SipenaPalette.blue,
-                          tint: SipenaPalette.paleBlue,
-                          icon: Icons.science_outlined,
-                        ),
-                        _ReportCountCard(
-                          label: 'Pengabdian',
-                          value: communityCount,
-                          color: SipenaPalette.teal,
-                          tint: SipenaPalette.paleTeal,
-                          icon: Icons.volunteer_activism_outlined,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    SipenaSurfaceCard(
-                      padding: EdgeInsets.zero,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                  const SizedBox(height: 16),
+                  LayoutBuilder(
+                    builder: (context, countConstraints) {
+                      final columns = countConstraints.maxWidth < 620 ? 1 : 3;
+                      final cardWidth =
+                          (countConstraints.maxWidth - 12 * (columns - 1)) /
+                          columns;
+                      return Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.all(18),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    'Pratinjau Data',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge,
-                                  ),
-                                ),
-                                FilledButton.icon(
-                                  key: const Key('print-activity-report'),
-                                  onPressed: _isPrinting ? null : _printReport,
-                                  icon: _isPrinting
-                                      ? const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : const Icon(Icons.print_outlined),
-                                  label: Text(
-                                    _isPrinting ? 'Menyiapkan...' : 'Cetak PDF',
-                                  ),
-                                ),
-                              ],
+                          SizedBox(
+                            width: cardWidth,
+                            child: _ReportCountCard(
+                              label: 'Total kegiatan',
+                              value: items.length,
+                              color: SipenaPalette.navy,
+                              tint: SipenaPalette.paleBlue,
+                              icon: Icons.assessment_outlined,
                             ),
                           ),
-                          const Divider(height: 1),
-                          if (items.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.all(24),
-                              child: Center(
-                                child: Text(
-                                  'Tidak ada data untuk filter yang dipilih.',
-                                ),
-                              ),
-                            )
-                          else
-                            for (final item in items)
-                              ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor: item.type.tint,
-                                  foregroundColor: item.type.color,
-                                  child: Icon(item.type.icon),
-                                ),
-                                title: Text(item.title),
-                                subtitle: Text(
-                                  '${item.studentName} · ${item.type.label} · ${item.year}',
-                                ),
-                                trailing: Text(
-                                  formatActivityDate(item.activityDate),
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ),
+                          SizedBox(
+                            width: cardWidth,
+                            child: _ReportCountCard(
+                              label: 'Penelitian',
+                              value: researchCount,
+                              color: SipenaPalette.blue,
+                              tint: SipenaPalette.paleBlue,
+                              icon: Icons.science_outlined,
+                            ),
+                          ),
+                          SizedBox(
+                            width: cardWidth,
+                            child: _ReportCountCard(
+                              label: 'Pengabdian',
+                              value: communityCount,
+                              color: SipenaPalette.teal,
+                              tint: SipenaPalette.paleTeal,
+                              icon: Icons.volunteer_activism_outlined,
+                            ),
+                          ),
                         ],
-                      ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 18),
+                  SipenaSurfaceCard(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(18),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Pratinjau Data',
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
+                              ),
+                              FilledButton.icon(
+                                key: const Key('print-activity-report'),
+                                onPressed: _isPrinting ? null : _printReport,
+                                icon: _isPrinting
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Icon(Icons.print_outlined),
+                                label: Text(
+                                  _isPrinting ? 'Menyiapkan...' : 'Cetak PDF',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Divider(height: 1),
+                        if (items.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.all(24),
+                            child: Center(
+                              child: Text(
+                                'Tidak ada data untuk filter yang dipilih.',
+                              ),
+                            ),
+                          )
+                        else
+                          for (final item in items)
+                            ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: item.type.tint,
+                                foregroundColor: item.type.color,
+                                child: Icon(item.type.icon),
+                              ),
+                              title: Text(item.title),
+                              subtitle: Text(
+                                '${item.studentName} · ${item.type.label} · ${item.year}',
+                              ),
+                              trailing: Text(
+                                formatActivityDate(item.activityDate),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -378,25 +390,22 @@ class _ReportCountCard extends StatelessWidget {
   final IconData icon;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 218,
-    child: SipenaSurfaceCard(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          SipenaIconTile(icon: icon, color: color, background: tint, size: 40),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('$value', style: Theme.of(context).textTheme.titleLarge),
-                Text(label, style: Theme.of(context).textTheme.bodySmall),
-              ],
-            ),
+  Widget build(BuildContext context) => SipenaSurfaceCard(
+    padding: const EdgeInsets.all(16),
+    child: Row(
+      children: [
+        SipenaIconTile(icon: icon, color: color, background: tint, size: 40),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('$value', style: Theme.of(context).textTheme.titleLarge),
+              Text(label, style: Theme.of(context).textTheme.bodySmall),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     ),
   );
 }

@@ -389,14 +389,13 @@ class _ActivityPageLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final horizontalPadding = constraints.maxWidth < 620 ? 20.0 : 36.0;
-        final contentWidth = constraints.maxWidth > 1232
-            ? 1160.0
-            : constraints.maxWidth - horizontalPadding * 2;
+        final isCompact = constraints.maxWidth < 620;
+        final horizontalPadding = isCompact ? SipenaSpacing.pageMobile : 24.0;
+        final contentWidth = constraints.maxWidth - horizontalPadding * 2;
         return SingleChildScrollView(
           padding: EdgeInsets.symmetric(
             horizontal: horizontalPadding,
-            vertical: constraints.maxWidth < 620 ? 24 : 32,
+            vertical: isCompact ? 20 : 24,
           ),
           child: Center(
             child: SizedBox(
@@ -1165,7 +1164,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
             children: [
               Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 640),
+                  constraints: const BoxConstraints(maxWidth: 1100),
                   child: Column(
                     children: [
                       _FormGroupHeading(
@@ -1270,7 +1269,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
           alignment: Alignment.center,
           heightFactor: 1,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
+            constraints: const BoxConstraints(maxWidth: 1100),
             child: SizedBox(
               width: double.infinity,
               height: 50,
