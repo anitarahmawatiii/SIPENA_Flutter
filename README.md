@@ -21,6 +21,56 @@ Aplikasi ini dikembangkan untuk membantu proses pengelolaan dan pemantauan kegia
 - **Cetak Laporan:** menampilkan rekap kegiatan berdasarkan periode atau jenis kegiatan.
 - **Profil Pengguna:** melihat dan memperbarui informasi profil.
 
+## Screenshot Aplikasi SIPENA
+
+### Halaman Login
+![Halaman Login](login.png)
+
+### Beranda Mahasiswa
+![Beranda Mahasiswa 1](beranda%20mahasiswa1.png)
+
+![Beranda Mahasiswa 2](beranda%20mahasiswa2.png)
+
+![Beranda Mahasiswa 3](beranda%20mahasiswa3.png)
+
+### Beranda Admin
+![Beranda Admin 1](beranda%20admin1.png)
+
+![Beranda Admin 2](beranda%20admin2.png)
+
+### Daftar Penelitian
+![Daftar Penelitian](daftar%20penelitian.png)
+
+### Daftar Pengabdian
+![Daftar Pengabdian](daftar%20pengabdian.png)
+
+### Detail Penelitian
+![Detail Penelitian](detail%20penelitian.png)
+
+### Kegiatan Mahasiswa
+![Kegiatan Mahasiswa](kegiatan%20mahasiswa.png)
+
+### Kelola Pengguna
+![Kelola Pengguna](kelola%20pengguna.png)
+
+### Cetak Laporan
+![Cetak Laporan 1](cetak%20laporan.png)
+
+![Cetak Laporan 2](cetak%20laporan2.png)
+
+### Notifikasi
+![Notifikasi](notifikasi.png)
+
+### Pengaturan
+![Pengaturan 1](pengaturan1.png)
+
+![Pengaturan 2](pengaturan2.png)
+
+### Profil Mahasiswa
+![Profil Mahasiswa 1](profil%20mahasiswa1.png)
+
+![Profil Mahasiswa 2](profil%20mahasiswa2.png)
+
 ## Langkah Menjalankan Proyek
 
 ### Persyaratan Sistem
