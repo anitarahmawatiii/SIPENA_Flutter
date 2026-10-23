@@ -68,6 +68,13 @@ Future<void> _fillField(
   await tester.enterText(field, value);
 }
 
+Future<void> _dismissSnackBar(WidgetTester tester) async {
+  tester
+      .state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger))
+      .hideCurrentSnackBar();
+  await tester.pumpAndSettle();
+}
+
 Future<void> _signInAs(WidgetTester tester, String role) async {
   await tester.pumpWidget(const SipenaApp());
   if (role != 'Mahasiswa') {
@@ -303,6 +310,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ActivityFormPage), findsOneWidget);
     expect(find.byKey(const Key('field-location')), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Tambah Kegiatan'), findsOneWidget);
+    expect(find.text('Kegiatan Saya'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('student-add-penelitian')));
+    await tester.pumpAndSettle();
+    expect(find.byType(ActivityFormPage), findsOneWidget);
     await _fillField(tester, 'field-title', 'Riset Mahasiswa Mandiri');
     await _fillField(tester, 'field-student-name', 'Mahasiswa Tes');
     await _fillField(tester, 'field-student-id', '2310101099');
@@ -315,6 +330,8 @@ void main() {
     await tester.tap(find.text('Simpan Data'));
     await tester.pumpAndSettle();
 
+    expect(find.text('Kegiatan berhasil ditambahkan.'), findsOneWidget);
+    await _dismissSnackBar(tester);
     expect(find.text('Riset Mahasiswa Mandiri'), findsOneWidget);
     await tester.enterText(
       find.byKey(const Key('student-activity-search')),
@@ -380,6 +397,8 @@ void main() {
     await tester.ensureVisible(find.text('Simpan Data'));
     await tester.tap(find.text('Simpan Data'));
     await tester.pumpAndSettle();
+    expect(find.text('Kegiatan berhasil ditambahkan.'), findsOneWidget);
+    await _dismissSnackBar(tester);
     expect(find.text('Edukasi Digital Warga'), findsOneWidget);
     await tester.tap(find.byKey(const Key('student-filter-penelitian')));
     await tester.pumpAndSettle();

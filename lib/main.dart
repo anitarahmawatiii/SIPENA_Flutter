@@ -6,6 +6,7 @@ import 'admin_report_page.dart';
 import 'admin_validation_page.dart';
 import 'login_page.dart';
 import 'sipena_design.dart';
+import 'sipena_snackbar.dart';
 import 'user_management_page.dart';
 
 void main() {
@@ -202,7 +203,7 @@ class _DashboardPageState extends State<DashboardPage> {
     ),
   ];
 
-  Future<void> _openActivityForm(
+  Future<bool> _openActivityForm(
     ActivityType type, {
     ActivityEntry? initial,
   }) async {
@@ -212,7 +213,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ActivityFormPage(type: type, id: _nextActivityId, initial: initial),
       ),
     );
-    if (result == null || !mounted) return;
+    if (result == null || !mounted) return false;
 
     setState(() {
       final items = widget.role == SipenaRole.mahasiswa
@@ -241,6 +242,10 @@ class _DashboardPageState extends State<DashboardPage> {
         );
       }
     });
+    if (initial == null) {
+      SipenaSnackBar.showSuccess(context, 'Kegiatan berhasil ditambahkan.');
+    }
+    return true;
   }
 
   Future<bool> _deleteActivity(ActivityEntry item) async {
@@ -486,9 +491,8 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _addStudentActivity(ActivityType type) async {
-    await _openActivityForm(type);
-    if (!mounted) return;
-    _navigateTo(1);
+    final saved = await _openActivityForm(type);
+    if (saved && mounted) _navigateTo(1);
   }
 }
 
