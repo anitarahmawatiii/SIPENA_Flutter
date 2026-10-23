@@ -26,6 +26,9 @@ Aplikasi ini dikembangkan untuk membantu proses pengelolaan dan pemantauan kegia
 ### Halaman Login
 ![Halaman Login](login.png)
 
+### Halaman Register
+![Halaman Register](register.png)
+
 ### Beranda Mahasiswa
 ![Beranda Mahasiswa 1](beranda%20mahasiswa1.png)
 
