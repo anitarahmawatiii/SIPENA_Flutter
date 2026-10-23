@@ -39,10 +39,9 @@ Sebelum menjalankan aplikasi SIPENA, pastikan perangkat telah memiliki:
 Unduh atau clone repository SIPENA dari GitHub ke komputer. Jika menggunakan Git, jalankan perintah berikut pada terminal:
 
 ```bash
-git clone URL_REPOSITORY_SIPENA
+git clone (https://github.com/anitarahmawatiii/SIPENA_Flutter)
 ```
 
-Ganti `URL_REPOSITORY_SIPENA` dengan link repository GitHub milikmu.
 
 **2. Membuka Proyek**
 
